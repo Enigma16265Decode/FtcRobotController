@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,16 +18,24 @@ public class DecodeTeleop extends LinearOpMode {
 
     double redGoalX = 0, redGoalY = 0;
     double blueGoalX = 0, BlueGoalY = 0;
+    double targetVelocity;
     boolean isRed = true;
+    boolean shooting;
+    boolean shooterIsAtSpeed;
 
     Pose2D blueGoalPos = new Pose2D(DistanceUnit.INCH, 1.0 ,1.0,AngleUnit.DEGREES,0);
     Pose2D redGoalPos = new Pose2D(DistanceUnit.INCH, 1.0 ,1.0,AngleUnit.DEGREES,0);
     Servo turret;
-    DcMotor shooter;
+    DcMotorEx shooter; //dont use Ex for all motors, just use DcMotor
 
 
 
-    public double getDistanceToGoal(double robotPosX, double robotPosY, boolean isRed) {
+    public double getDistanceToGoal() {
+        double robotPosX, robotPosY;
+
+        robotPosX = pinpoint.getPosX(DistanceUnit.INCH);
+        robotPosY = pinpoint.getPosY(DistanceUnit.INCH);
+
         Pose2D goal = redGoalPos;
 
         if (!isRed) {
@@ -39,12 +48,7 @@ public class DecodeTeleop extends LinearOpMode {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-
-    public double AimGetAngle(boolean robotVelocity) {
-        double angle = 1;
-
-        return angle;
-    }
+    
 
     public double angleToServoPos(double angle) {
         double denominator = 360;
@@ -72,10 +76,43 @@ public class DecodeTeleop extends LinearOpMode {
         return angleInDegrees;
     }
 
-    public void shoot() {
-        aimAtGoal();
+    public void shootLogic() {
+        while(shooting) {
+            aimAtGoal();
+            setShooterSpeedBasedOffDistance();
+            if (!shooterIsAtSpeed) {
+                shooter.setVelocity(targetVelocity);
+            }
+        }
+
 
         //todo make this work
+    }
+
+    public void shoot() {
+        shooting = true;
+    }
+
+    public void setShooterSpeedBasedOffDistance() {
+        final double denominatorConstant = 67;
+
+        targetVelocity = getDistanceToGoal()/denominatorConstant; //not sure how this will exactly work but this is the idea
+    }
+    public double rpmToTPR() {
+        return 1;
+    }
+
+    public boolean shooterIsAtSpeed() {
+        double tpr = 28; //todo possibly change this depending on which motor we're using, 28 is based off the gobilda 6000rpm motor
+        double velocityTicksPerSecond = shooter.getVelocity();
+        double rpm = (velocityTicksPerSecond / tpr) * 60;
+
+        if(rpm > targetVelocity) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public void aimAtGoal() {
@@ -96,7 +133,9 @@ public class DecodeTeleop extends LinearOpMode {
         //hardware
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class,"pinpoint");
         turret = hardwareMap.get(Servo.class,"turret");
-        shooter = hardwareMap.get(DcMotor.class, "shooter");
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
