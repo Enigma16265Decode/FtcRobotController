@@ -48,6 +48,27 @@ public class DecodeTeleop extends LinearOpMode {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    public static double calculateY(double h, double x, double alphaDegrees, double g, double V0) {
+        double alphaRadians = Math.toRadians(alphaDegrees); // Convert degrees to radians
+        double tanAlpha = Math.tan(alphaRadians);
+        double cosAlpha = Math.cos(alphaRadians);
+
+        double y = h + x * tanAlpha - (g * x * x) / (2 * V0 * V0 * cosAlpha * cosAlpha);
+        return y;
+    }
+
+    //thank you chatgpt for translating this equation <3
+    public static void main(String[] args) {
+        // Example inputs
+        double h = 10.0;           // Initial height in meters
+        double x = 20.0;           // Horizontal distance in meters
+        double alpha = 45.0;       // Launch angle in degrees
+        double g = 9.81;           // Acceleration due to gravity in m/s²
+        double V0 = 30.0;          // Initial velocity in m/s
+
+        double y = calculateY(h, x, alpha, g, V0);
+        System.out.println("y = " + y);
+    }
     
 
     public double angleToServoPos(double angle) {
