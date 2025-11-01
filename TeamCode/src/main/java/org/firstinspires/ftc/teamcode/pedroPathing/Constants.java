@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(5);
+            .mass(7); //6 or 7 ;)
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(-8)
