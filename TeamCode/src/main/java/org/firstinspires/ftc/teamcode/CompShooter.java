@@ -10,12 +10,20 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.FTCCoordinates;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.PedroCoordinates;
+import com.pedropathing.geometry.Pose;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 /* The Shooter Class for the the varsity robot whatever
  * TODO: get the target shooter velocity. get the function of the angle
+ *  todo: once turret is functional, re-enable all disabled turret movement commands
  * tetris pieces ░█
  *
  *
@@ -38,19 +46,21 @@ public class CompShooter extends LinearOpMode {
     Pose testPose1 = new Pose(14, 39, Math.toRadians(0));
     Pose testPose2 = new Pose(34, 19, Math.toRadians(0));
 
+    DcMotorEx turret;
     DcMotorEx primaryShooter;
     DcMotor secondaryShooter;
     DcMotor rightFront, rightRear, leftRear, leftFront;
+    DcMotor intake;
     Servo hoodLeft;
     Servo hoodRight;
-    Servo turretLeft;
-    Servo turretRight;
     Servo gate;
     GoBildaPinpointDriver pinpoint;
 
     double targetShooterVelocity = 11/16265; //note that the guide used as a reference used 10/13.5. replace 16265 with most likely 13.5-13.8
     //this could also be final I think ^
-    public double p = 0, i = 0, d = 0; //we will almost certainly not change d, change p after finding good i value
+    double targetTurretPos = 1;
+    public double sP = 0, sI = 0, sD = 0; //we will almost certainly not change d, change p after finding good i value
+    public double tP = 0, tI = 0, tD = 0; //we will almost certainly change d, change p after finding good i value
     int maxVelocityVariability = 200;
     boolean isRed = true; //TODO I was working on getting the distance, but I needed the two goal poses and need them to be variable depending on which team you're on
     double distanceFromGoal;
@@ -59,10 +69,17 @@ public class CompShooter extends LinearOpMode {
     boolean queueShooting = true;
     double turretOffset = 0.0;
 
-    PIDController controller;
-    double pid;
+    double gateClosed = 0.6;
+    double gateOpen = 0.4;
+
+
+    PIDController shooterController;
+    PIDController turretController;
+    double shooterPid;
+    double turretPid;
     Pose goalPose;
     Pose estimatedRobotPose;
+    //private Limelight3A camera;
 
     /**Called when determining if you can shoot*/
     boolean isReadyToShoot(boolean buttonPressed) {
@@ -100,59 +117,106 @@ public class CompShooter extends LinearOpMode {
         return 6.7 * distanceFromGoal;
     }
 
-    /**Calculates the yaw (left and right) of the turret based on the distance to goal */
-    private double servoYawBasedOnVariables() {
-        double ratioGuy = 0.67; //this needs to turn the degrees into servo values (0-1)
+    /**Calculates the yaw based off the angle of the robot to the goal, and the heading of the robot */
+    private double aimTurret() {
+        double ticksInDegree = 1 /* todo measure this */ / 180.0;
         Pose effectiveGoalPose = new Pose(
                 goalPose.getX() + pinpoint.getVelX(DistanceUnit.INCH),
                 goalPose.getY() + pinpoint.getVelY(DistanceUnit.INCH));
         double dx = effectiveGoalPose.getX() - estimatedRobotPose.getX();
         double dy = effectiveGoalPose.getY() - estimatedRobotPose.getY();
-        double headingRadians = Math.atan2(dy, dx);
-        double headingDegrees = Math.toDegrees(headingRadians);
+        double goalHeadingRadians = Math.atan2(dy, dx);
+        double robotHeadingRadians = Math.toRadians(pinpoint.getHeading(AngleUnit.DEGREES));
+        double turretHeadingRadians = goalHeadingRadians - robotHeadingRadians;
+        double turretHeadingDegrees = Math.toDegrees(turretHeadingRadians);
 
+        double unwrappedDegrees = ticksInDegree * turretHeadingDegrees;
 
-        return ratioGuy * headingDegrees;
+        if(unwrappedDegrees > 180.0) {
+            return unwrappedDegrees - 360.0;
+        }
+        if(unwrappedDegrees < 180.0) {
+            return unwrappedDegrees + 360.0;
+        }
+        else {
+            return unwrappedDegrees;
+        }
+
     }
 
     /**Calculates the power to give the shooter motors, but does not assign the motor to run the power */
     private void shooterController() {
-        controller.setPID(p, i, d);
+        shooterController.setPID(sP, sI, sD);
         double currentVelocity = primaryShooter.getVelocity();
-        pid = controller.calculate(currentVelocity, targetShooterVelocity);
+        shooterPid = shooterController.calculate(currentVelocity, targetShooterVelocity);
+    }
+
+    private void turretController() {
+        turretController.setPID(tP, tI, tD);
+        int turretPos = turret.getCurrentPosition();
+        turretPid = turretController.calculate(turretPos, targetTurretPos);
+
+        double power = turretPid;
+
+        //turret.setPower(power);
+
+        telemetry.addData("turretPos ", turretPos);
+        telemetry.addData("turretTarget ", targetTurretPos);
+    }
+
+    private void setHoodPos(double value) {
+        double offset = 0;
+        double minServoPos = 0.2;
+        double maxServoPos = 0.9;
+
+        if(value < minServoPos) {
+            hoodLeft.setPosition(minServoPos);
+            hoodRight.setPosition(minServoPos + offset);
+        }
+        if(value > maxServoPos) {
+            hoodLeft.setPosition(maxServoPos);
+            hoodRight.setPosition(maxServoPos + offset);
+        }
+        else {
+            hoodLeft.setPosition(value);
+            hoodRight.setPosition(value + offset);
+        }
     }
 
     /**Based on the state machine, runs different methods relevant to the current state*/
     private void executeMethodsBasedOnState() {
         if (robotState == RobotStates.AIMING) {
-            turretLeft.setPosition(servoYawBasedOnVariables());
-            turretRight.setPosition(servoYawBasedOnVariables() + turretOffset);
+            //turret.setPower(turretPid);
 
-            hoodLeft.setPosition(servoPitchBasedOnDistance());
-            hoodRight.setPosition(servoPitchBasedOnDistance()); //maybe add a hood offset, but doesnt seem likely
+            setHoodPos(servoPitchBasedOnDistance());
 
-            primaryShooter.setPower(pid);
-            secondaryShooter.setPower(pid);
+            primaryShooter.setPower(shooterPid);
+            secondaryShooter.setPower(shooterPid);
 
             if (isReadyToShoot(gamepad2.a)) { //
                 robotState = RobotStates.READY_TO_SHOOT;
             }
         }
         if (robotState == RobotStates.READY_TO_SHOOT) {
-            if(gamepad2.x) {
-                shoot();
+            if(gamepad2.x && gamepad2.xWasPressed()) {
+                toggleGate();
             }
         }
     }
 
     /** Called whenever robot is told to outtake artifacts*/
-    void shoot() {
-        gate.setPosition(1);
-    }
+    void toggleGate() {
+        boolean hasToggled = false;
 
-    /**Called after outtaking all artifacts */
-    void endShooting() {
-        gate.setPosition(0);
+        if(gate.getPosition() == gateOpen && hasToggled == false) {
+            gate.setPosition(gateClosed);
+            hasToggled = true;
+        }
+        if(gate.getPosition() == gateClosed && hasToggled == false) {
+            gate.setPosition(gateOpen);
+            hasToggled = false;
+        }
+
     }
 
     /**Drive code for robot relative drive (POV)*/
@@ -177,7 +241,8 @@ public class CompShooter extends LinearOpMode {
 
     /**Initializes the PID controller values*/
     private void initPID() {
-        controller = new PIDController(p, i, d);
+        shooterController = new PIDController(sP, sI, sD);
+        turretController = new PIDController(tP, tI, sI);
         //telemetry
     }
 
@@ -191,15 +256,22 @@ public class CompShooter extends LinearOpMode {
 
     /**Initializes the hardware variables to the actual hardware post-init button pressed*/
     private void initializeHardware() {
-        primaryShooter = hardwareMap.get(DcMotorEx.class, "primaryShooter");
-        secondaryShooter = hardwareMap.get(DcMotor.class, "secondaryShooter");
-        hoodLeft = hardwareMap.get(Servo.class, "hoodLeft");
-        hoodRight = hardwareMap.get(Servo.class, "hoodRight");
+        //camera = hardwareMap.get(Limelight3A.class, "limelight");
+
+        primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
+        secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
+
+        hoodLeft = hardwareMap.get(Servo.class, "leftHood");
+        hoodRight = hardwareMap.get(Servo.class, "rightHood");
+        gate = hardwareMap.get(Servo.class, "gate");
 
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
-        rightRear = hardwareMap.get(DcMotor.class, "rightBack");
+        rightRear = hardwareMap.get(DcMotor.class, "rightRear");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+
+        intake = hardwareMap.get(DcMotor.class, "intake");
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -261,6 +333,7 @@ public class CompShooter extends LinearOpMode {
     private void masterFunction() {
         interpretInputs();
         shooterController();
+        //turretController();
         updateDistance();
         executeMethodsBasedOnState();
         drivePOV();

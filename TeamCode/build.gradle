@@ -31,6 +31,8 @@ apply plugin: 'org.team11260.fast-load-plugin'
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
+    compileSdk 35    defaultConfig {        minSdk 24    } //IMPORTANT REMEMBER I DID THIS
+
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }

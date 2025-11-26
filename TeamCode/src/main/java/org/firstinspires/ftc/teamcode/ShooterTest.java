@@ -93,10 +93,10 @@ public class ShooterTest extends LinearOpMode {
     }
 
     private void initializeHardware() {
-        pShooter = hardwareMap.get(DcMotorEx.class, "primaryShooter");
-        sShooter = hardwareMap.get(DcMotor.class, "secondaryShooter");
-        hoodLeft = hardwareMap.get(Servo.class, "hoodLeft");
-        hoodRight = hardwareMap.get(Servo.class, "hoodRight");
+        pShooter = hardwareMap.get(DcMotorEx.class, "leftShooter");
+        sShooter = hardwareMap.get(DcMotor.class, "rightShooter");
+        hoodLeft = hardwareMap.get(Servo.class, "leftHood");
+        hoodRight = hardwareMap.get(Servo.class, "rightHood");
 
         pShooter.setDirection(DcMotorSimple.Direction.REVERSE);
         hoodRight.setDirection(Servo.Direction.REVERSE);
