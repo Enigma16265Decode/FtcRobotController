@@ -15,16 +15,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(7); //6 or 7 ;)
+            .mass(12);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(4.7)
             .strafePodX(2.54)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
-            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
-            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)

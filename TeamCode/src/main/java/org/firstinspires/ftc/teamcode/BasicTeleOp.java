@@ -7,7 +7,8 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -18,17 +19,20 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Configurable
-@TeleOp(name = "! basic tele")
-public class BasicTeleop extends OpMode {
-    private Follower follower;
-    public static Pose startingPose = new Pose(0,0,0);
+import java.util.function.Supplier;
 
-    public static double sP = 0.0003, sI = 0.88 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
-    public static int targetSpeed = 1600; //11 / 13.6 * 1480
+@Configurable
+@TeleOp(name = "! FC TeleOP \uD83D\uDC80")
+public class BasicTeleOp extends OpMode {
+    private Follower follower;
+    public static Pose startingPose = new Pose(14,14,Math.toRadians(0));
+    private Supplier<PathChain> pathChain;
+
+    public static double sP = 0.01, sI = 0.3 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
+    public static int targetSpeed = 1300; //11 / 13.6 * 1480
     private final double ticksInDegree = 0;
-    double gateClosed = 0.6;
-    double gateOpen = 0.4;
+    double gateClosed = 0.4;
+    double gateOpen = 0.2;
 
     static TelemetryManager telemetryM;
     PIDController shooterController;
@@ -41,7 +45,6 @@ public class BasicTeleop extends OpMode {
     private Servo hoodRight;
     private Servo gate;
 
-    double currentVelocity = primaryShooter.getVelocity();
 
     private void initialize() {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -61,6 +64,15 @@ public class BasicTeleop extends OpMode {
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
 
+        primaryShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        secondaryShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -74,13 +86,10 @@ public class BasicTeleop extends OpMode {
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        /*
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
-
-         */
     }
 
     private void drivePOV() {
@@ -109,14 +118,18 @@ public class BasicTeleop extends OpMode {
     }
 
     private void shooterController() {
-        if(gamepad1.a) {
+        double currentVelocity = primaryShooter.getVelocity();
+
+        if(gamepad1.left_bumper) {
             shooterController.setPID(sP, sI, sD);
             double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
 
             setShooterPower(shooterPid);
+            gate.setPosition(gateOpen);
         }
         else {
             setShooterPower(0);
+            gate.setPosition(gateClosed);
         }
     }
 
@@ -132,19 +145,27 @@ public class BasicTeleop extends OpMode {
                 intake.setPower(0);
             }
         }
+        /*
+        if(!gamepad1.a && gamepad1.right_trigger > 0.4) {
+            setShooterPower(-0.4);
+        }
+
+         */
     }
 
     private void telemetry() {
-        telemetryM.debug("velocity: ", currentVelocity);
+        //telemetryM.debug("velocity: ", currentVelocity);
         telemetryM.debug("target :", targetSpeed);
         telemetryM.debug("hood pos: ", hoodLeft.getPosition());
         telemetryM.update();
 
-        telemetry.addData("velocity: ", currentVelocity);
+        //telemetry.addData("velocity: ", currentVelocity);
         telemetry.addData("target :", targetSpeed);
         telemetry.addData("hood pos: ", hoodLeft.getPosition());
         telemetry.addData("power : ", primaryShooter.getPower());
+        telemetry.addData("shooter vel: ", primaryShooter.getVelocity());
         telemetry.addData("intake power: ", intake.getPower());
+        telemetry.addData("gate pos: ", gate.getPosition());
 
         telemetry.update();
     }
@@ -152,7 +173,7 @@ public class BasicTeleop extends OpMode {
 
 
     private void gateController() {
-        if(gamepad2.x && gamepad2.xWasPressed()) {
+        if(gamepad1.x && gamepad1.xWasPressed()) {
             toggleGate();
         }
     }
@@ -168,7 +189,9 @@ public class BasicTeleop extends OpMode {
             gate.setPosition(gateOpen);
             hasToggled = false;
         }
-
+        else {
+            gate.setPosition(gateClosed);
+        }
     }
 
     private void setHoodPos(double value) {
@@ -179,7 +202,7 @@ public class BasicTeleop extends OpMode {
     private void hoodControl() {
         double amountToMove = 0.05;
 
-        if(gamepad1.left_bumper && gamepad1.leftBumperWasPressed()) {
+        if(gamepad1.dpad_right && gamepad1.dpadRightWasPressed()) {
             double toSet = (hoodLeft.getPosition() - amountToMove);
             if (toSet < 0.15) {
                 setHoodPos(0.15);
@@ -188,7 +211,7 @@ public class BasicTeleop extends OpMode {
                 setHoodPos(toSet);
             }
         }
-        if(gamepad1.right_bumper && gamepad1.rightBumperWasPressed()) {
+        if(gamepad1.dpad_left && gamepad1.dpadLeftWasPressed()) {
             double toSet = (hoodLeft.getPosition() + amountToMove);
 
             if (toSet > 0.9) {
@@ -200,24 +223,56 @@ public class BasicTeleop extends OpMode {
         }
     }
 
-    private void robotCentricDrive() {
-        follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, false);
-        follower.update();
+    private void fieldCentricDrive() {
+        boolean automatedDrive = false;
+        double slowmodeMultiplier = 0.3;
 
-        /* Telemetry Outputs of our Follower */
-        telemetry.addData("X", follower.getPose().getX());
-        telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));
+        //Call this once per loop
+        follower.update();
+        telemetryM.update();
+
+        if (!automatedDrive) {
+
+
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+
+            //This is the normal version to use in the TeleOp
+            if (!gamepad1.left_bumper) follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x,
+                    false // Robot Centric
+            );
+                //This is how it looks with slowMode on
+            else follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * slowmodeMultiplier,
+                    -gamepad1.left_stick_x * slowmodeMultiplier,
+                    -gamepad1.right_stick_x * slowmodeMultiplier,
+                    false // Robot Centric
+            );
+        }
+
+
+
+        //telemetryM.debug("position", follower.getPose());
+        //telemetryM.debug("velocity", follower.getVelocity());
+        //telemetryM.debug("automatedDrive", automatedDrive);
+    }
+
+    void relocalizePinpoint() {
+
     }
 
     private void masterFunction() {
+        fieldCentricDrive();
         hoodControl();
         gateController();
-        intakeController();
         shooterController();
-
+        intakeController(); //make sure this goes after shooter controller
+        relocalizePinpoint();
         //drivePOV();
-        robotCentricDrive();
+
 
         telemetry();
     }

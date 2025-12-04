@@ -6,7 +6,21 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 
-public class Dauto {
+public class Dauto extends OpMode{
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void loop() {
+        
+    }
 }
 /*
 @Configurable
