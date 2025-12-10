@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
+import static java.lang.Thread.sleep;
+
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -13,7 +14,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -44,19 +44,19 @@ public class Dauto extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(119, 130, Math.toRadians(45)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(75, 89, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose scorePose = new Pose(89, 99, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
     double targetSpeed = BasicTeleOp.targetSpeed;
     double gateOpen = 0.2;
     double gateClosed = 0.4; //get from basic tele, was letting me nab em for some reason
 
-    private Path scorePreload;
+    private Path scorePreloadRed;
     //private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreload = new Path(new BezierLine(startPose, scorePose));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+        scorePreloadRed = new Path(new BezierLine(startPose, scorePose));
+        scorePreloadRed.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
 
 
@@ -104,15 +104,18 @@ public class Dauto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreload);
+                follower.followPath(scorePreloadRed);
                 setPathState(1);
                 break;
             case 1:
+                if(follower.isBusy()) {
+                    spinFlywheel();
+                }
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
                         setPathState(2);
-                        throw new RuntimeException("idsgoinkla");
+                        //throw new RuntimeException("idsgoinkla");
                     }
                     break;
                     //throw new RuntimeException("squinkaling");
@@ -135,27 +138,55 @@ public class Dauto extends OpMode {
         }
     }
 
+    public void spinFlywheel() {
+        double currentVelocity = primaryShooter.getVelocity();
+        shooterController.setPID(sP, sI, sD);
+        double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
+
+        setShooterPower(shooterPid);
+    }
 
     public void shoot() {
         canProceed = false;
         //shooterTimer.resetTimer();
 
-
         while(!canProceed) {
-            double currentVelocity = primaryShooter.getVelocity();
             boolean completedShooting = false;
+            spinFlywheel();
 
-            shooterController.setPID(sP, sI, sD);
-            double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
-
-            setShooterPower(shooterPid);
             gate.setPosition(gateOpen);
 
             if(shooterAtSpeed()) {
-                intake.setPower(1);
+                try {
+                    intake.setPower(1);
+                    sleep(200);
+                    intake.setPower(0);
+                    sleep(600);
+                    intake.setPower(1);
+                    sleep(200);
+                    intake.setPower(0);
+                    sleep(600);
+                    intake.setPower(1);
+                    sleep(200);
+                    intake.setPower(0);
+                    sleep(600);
+                    intake.setPower(1);
+                    sleep(200);
+                    intake.setPower(0);
+                    sleep(600);
+                    intake.setPower(1);
+                    sleep(200);
+                    intake.setPower(0);
+                    sleep(600);
+                    intake.setPower(1);
+                    sleep(200);
+                    intake.setPower(0);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
-            if(/*shooterTimer.getElapsedTime() >= 6000*/ false) {
+            if(pathTimer.getElapsedTime() >= 6000) {
                 completedShooting = true;
             }
 

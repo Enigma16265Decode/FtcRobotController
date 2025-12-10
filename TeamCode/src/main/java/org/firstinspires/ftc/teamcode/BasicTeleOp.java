@@ -188,7 +188,7 @@ public class BasicTeleOp extends OpMode {
     }
 
     private void faceGoal() {
-        Pose poseToRotateTo = new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(getHeadingToGoal()));
+        Pose poseToRotateTo = new Pose(follower.getPose().getX()+3, follower.getPose().getY(), Math.toRadians(getHeadingToGoal()));
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, poseToRotateTo)))
@@ -219,6 +219,7 @@ public class BasicTeleOp extends OpMode {
         telemetry.addData("power : ", primaryShooter.getPower());
         telemetry.addData("shooter vel: ", primaryShooter.getVelocity());
         telemetry.addData("intake power: ", intake.getPower());
+        telemetry.addData("goal heading: ", getHeadingToGoal());
         //telemetry.addData("gate pos: ", gate.getPosition());
 
         telemetry.update();
@@ -281,6 +282,10 @@ public class BasicTeleOp extends OpMode {
         boolean automatedDrive = false;
         double slowmodeMultiplier = 0.3;
 
+        if(!follower.isBusy()) {
+            automatedDrive = false;
+        }
+
         //Call this once per loop
         follower.update();
         telemetryM.update();
@@ -327,11 +332,11 @@ public class BasicTeleOp extends OpMode {
 
         double unwrappedDegrees = turretHeadingDegrees;
 
-        if(unwrappedDegrees > 180.0) {
-            return unwrappedDegrees - 360.0;
+        if(unwrappedDegrees > 360.0) {
+            return (unwrappedDegrees - 360.0);
         }
-        if(unwrappedDegrees < 180.0) {
-            return unwrappedDegrees + 360.0;
+        if(unwrappedDegrees < 360.0) {
+            return (unwrappedDegrees + 360.0);
         }
         else {
             return unwrappedDegrees;
