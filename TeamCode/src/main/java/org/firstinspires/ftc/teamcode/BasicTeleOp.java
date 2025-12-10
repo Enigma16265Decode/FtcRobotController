@@ -17,22 +17,26 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp(name = "! FC TeleOP \uD83D\uDC80")
+@TeleOp(name = "! FC TeleOP \uD83D\uDFE5")
 public class BasicTeleOp extends OpMode {
     private Follower follower;
     public static Pose startingPose = new Pose(14,14,Math.toRadians(0));
     private Supplier<PathChain> pathChain;
 
-    public static double sP = 0.01, sI = 0.3 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
-    public static int targetSpeed = 1300; //11 / 13.6 * 1480
+    private boolean isRealigning = false;
+
+    public static double sP = 0.017, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
+    public static int targetSpeed = 1200;
     private final double ticksInDegree = 0;
-    double gateClosed = 0.4;
-    double gateOpen = 0.2;
+    public double gateClosed = 0.4;
+    public double gateOpen = 0.2;
 
     static TelemetryManager telemetryM;
     PIDController shooterController;
@@ -44,12 +48,27 @@ public class BasicTeleOp extends OpMode {
     private Servo hoodLeft;
     private Servo hoodRight;
     private Servo gate;
+    //private GoBildaPinpointDriver pinpoint;
+
+    boolean shootToggle = false;
+    private final boolean isRed = true;
+
+    private Pose goalPose() {
+        if(isRed) {
+            return new Pose(131.5, 136.5);
+        }
+        else {
+            return null;
+        }
+    }
 
 
     private void initialize() {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         shooterController = new PIDController(sP, sI, sD);
+
+        //pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         //maybe do something with telemetry I really don't know im way underqualified
 
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
@@ -64,8 +83,8 @@ public class BasicTeleOp extends OpMode {
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
 
-        primaryShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        secondaryShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //primaryShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //secondaryShooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -90,6 +109,7 @@ public class BasicTeleOp extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
+
     }
 
     private void drivePOV() {
@@ -120,7 +140,16 @@ public class BasicTeleOp extends OpMode {
     private void shooterController() {
         double currentVelocity = primaryShooter.getVelocity();
 
-        if(gamepad1.left_bumper) {
+        if(gamepad1.b && gamepad1.bWasPressed()) {
+            boolean stateBeforeToggle = shootToggle;
+            if(stateBeforeToggle) {
+                shootToggle = false;
+            }
+            else {
+                shootToggle = true;
+            }
+        }
+        if(gamepad1.right_bumper || shootToggle) {
             shooterController.setPID(sP, sI, sD);
             double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
 
@@ -145,6 +174,11 @@ public class BasicTeleOp extends OpMode {
                 intake.setPower(0);
             }
         }
+        if(gamepad1.x) {
+            if(primaryShooter.getVelocity() > 1150 && primaryShooter.getVelocity() < 1220) {
+                intake.setPower(1);
+            }
+        }
         /*
         if(!gamepad1.a && gamepad1.right_trigger > 0.4) {
             setShooterPower(-0.4);
@@ -153,11 +187,31 @@ public class BasicTeleOp extends OpMode {
          */
     }
 
+    private void faceGoal() {
+        Pose poseToRotateTo = new Pose(follower.getPose().getX(), follower.getPose().getY(), Math.toRadians(getHeadingToGoal()));
+
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, poseToRotateTo)))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
+                .build();
+        follower.followPath(pathChain.get());
+    }
+
+    private void faceGoalControl() {
+        if(gamepad1.yWasPressed()) {
+            faceGoal();
+            isRealigning = true;
+        }
+        if(!follower.isBusy()) {
+            isRealigning = false;
+        }
+    }
+
     private void telemetry() {
         //telemetryM.debug("velocity: ", currentVelocity);
-        telemetryM.debug("target :", targetSpeed);
-        telemetryM.debug("hood pos: ", hoodLeft.getPosition());
-        telemetryM.update();
+        //telemetryM.debug("target :", targetSpeed);
+        //telemetryM.debug("hood pos: ", hoodLeft.getPosition());
+        //telemetryM.update();
 
         //telemetry.addData("velocity: ", currentVelocity);
         telemetry.addData("target :", targetSpeed);
@@ -165,7 +219,7 @@ public class BasicTeleOp extends OpMode {
         telemetry.addData("power : ", primaryShooter.getPower());
         telemetry.addData("shooter vel: ", primaryShooter.getVelocity());
         telemetry.addData("intake power: ", intake.getPower());
-        telemetry.addData("gate pos: ", gate.getPosition());
+        //telemetry.addData("gate pos: ", gate.getPosition());
 
         telemetry.update();
     }
@@ -214,8 +268,8 @@ public class BasicTeleOp extends OpMode {
         if(gamepad1.dpad_left && gamepad1.dpadLeftWasPressed()) {
             double toSet = (hoodLeft.getPosition() + amountToMove);
 
-            if (toSet > 0.9) {
-                setHoodPos(0.9);
+            if (toSet > 1) {
+                setHoodPos(1);
             }
             else {
                 setHoodPos(toSet);
@@ -241,7 +295,7 @@ public class BasicTeleOp extends OpMode {
             if (!gamepad1.left_bumper) follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
+                    -gamepad1.right_stick_x*0.7,
                     false // Robot Centric
             );
                 //This is how it looks with slowMode on
@@ -260,8 +314,28 @@ public class BasicTeleOp extends OpMode {
         //telemetryM.debug("automatedDrive", automatedDrive);
     }
 
-    void relocalizePinpoint() {
+    private double getHeadingToGoal() {
+        Pose effectiveGoalPose = new Pose(
+                goalPose().getX() + follower.getVelocity().getXComponent(),
+                goalPose().getY() + follower.getVelocity().getYComponent());
+        double dx = effectiveGoalPose.getX() - follower.getPose().getX();
+        double dy = effectiveGoalPose.getY() - follower.getPose().getY();
+        double goalHeadingRadians = Math.atan2(dy, dx);
+        double robotHeadingRadians = Math.toRadians(follower.getHeading()); //this is in radians
+        double turretHeadingRadians = goalHeadingRadians - robotHeadingRadians;
+        double turretHeadingDegrees = Math.toDegrees(turretHeadingRadians);
 
+        double unwrappedDegrees = turretHeadingDegrees;
+
+        if(unwrappedDegrees > 180.0) {
+            return unwrappedDegrees - 360.0;
+        }
+        if(unwrappedDegrees < 180.0) {
+            return unwrappedDegrees + 360.0;
+        }
+        else {
+            return unwrappedDegrees;
+        }
     }
 
     private void masterFunction() {
@@ -270,28 +344,13 @@ public class BasicTeleOp extends OpMode {
         gateController();
         shooterController();
         intakeController(); //make sure this goes after shooter controller
-        relocalizePinpoint();
+        faceGoalControl();
         //drivePOV();
 
 
         telemetry();
     }
 
-    /*
-    @Override
-    public void runOpMode() {
-        initialize();
-
-        waitForStart();
-
-        setHoodPos(0.15);
-
-        while (opModeIsActive()) {
-            masterFunction();
-        }
-    }
-
-     */
 
     //important im now gonna use opmode instead of linearopmode because i like it more
 
