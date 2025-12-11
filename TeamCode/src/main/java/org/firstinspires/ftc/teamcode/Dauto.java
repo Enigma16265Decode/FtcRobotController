@@ -7,6 +7,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -17,6 +18,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import java.util.Map;
+
 enum ShootingStates {
     IDLE,
     ACCELERATING,
@@ -24,7 +27,7 @@ enum ShootingStates {
     SHOOTING
 }
 
-@Autonomous(name = "Dauto (Decode Auto)", group = "Examples")
+@Autonomous(name = "Rodger the auto (Red)", group = "Examples")
 public class Dauto extends OpMode {
 
     ShootingStates currentShootingState = ShootingStates.IDLE;
@@ -40,101 +43,122 @@ public class Dauto extends OpMode {
     private Servo gate;
 
     private boolean canProceed;
+    private boolean isShooting = false;
 
     private int pathState;
 
-    private final Pose startPose = new Pose(119, 130, Math.toRadians(45)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(89, 99, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose startPose = new Pose(119, 130, Math.toRadians(35)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(79, 95, Math.toRadians(35));
+    private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
 
-    double targetSpeed = BasicTeleOp.targetSpeed;
+    double targetSpeed = 1200;
     double gateOpen = 0.2;
     double gateClosed = 0.4; //get from basic tele, was letting me nab em for some reason
 
-    private Path scorePreloadRed;
-    //private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
+    private Path scorePreload;
+    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad;
+
+    private double toR(double toRadian) {
+        return Math.toRadians(toRadian);
+    }
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        scorePreloadRed = new Path(new BezierLine(startPose, scorePose));
-        scorePreloadRed.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+        scorePreload = new Path(new BezierLine(startPose, scorePose));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
-
-
-    /* Here is an example for Constant Interpolation
-    scorePreload.setConstantInterpolation(startPose.getHeading()); */
-
-        /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line.
-        grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, pickup1Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+        moveToBeforeStack1 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(scorePose, beforePickupStack1)
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
                 .build();
 
-
-        scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup1Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+        pickupStack1 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(beforePickupStack1, new Pose(113.500, 85.000))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
-
-        grabPickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, pickup2Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+        score2ndLoad = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(new Pose(113.500, 85.000), scorePose)
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(35))
                 .build();
-
-
-        scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-                .build();
-
-
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, pickup3Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
-                .build();
-
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-                .build();
-
-         */
     }
-    public void autonomousPathUpdate() {
-        switch (pathState) {
-            case 0:
-                follower.followPath(scorePreloadRed);
-                setPathState(1);
-                break;
-            case 1:
-                if(follower.isBusy()) {
-                    spinFlywheel();
-                }
-                if(!follower.isBusy()) {
-                    shoot();
-                    if(canProceed) {
-                        setPathState(2);
-                        //throw new RuntimeException("idsgoinkla");
-                    }
-                    break;
-                    //throw new RuntimeException("squinkaling");
-                }
-
-
-
-            /* You could check for
+    /* You could check for
             - Follower State: "if(!follower.isBusy()) {}"
             - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
             - Robot Position: "if(follower.getPose().getX() > 36) {}"
             */
-            case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case 0:
+                follower.followPath(scorePreload);
+                setPathState(1);
+                break;
+            case 1:
+                if(follower.isBusy()) {
+                    //spinFlywheel();
+                }
                 if(!follower.isBusy()) {
-                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
+                    shoot();
+                    if(canProceed) {
+                        stopFlywheel();
+                        follower.followPath(moveToBeforeStack1);
+                        gate.setPosition(gateClosed);
+                        setPathState(2);
+                    }
+                    break;
+                }
+            case 2:
+                if(!follower.isBusy() /*follower.atPose(beforePickupStack1, 8, 3, toR(20))*/) {
+                    intake.setPower(1);
+                    follower.followPath(pickupStack1);
+                    setPathState(3);
                 }
                 break;
+            case 3:
+                if(!follower.isBusy()) {
+                    //sleepRobot(300);
+                    follower.followPath(score2ndLoad);
+                    intake.setPower(0);
+                    setPathState(4);
+                }
+                break;
+            case 4:
+                if(!follower.isBusy()) {
+                    shoot();
+                    if(canProceed) {
+                        gate.setPosition(gateClosed);
+                        setPathState(5);
+                    }
+                }
+                else {
+                    //spinFlywheel();
+                }
+                break;
+            case 5:
+                stopFlywheel();
+                setPathState(-1);
+        }
+    }
+    private void stopFlywheel() {
+        primaryShooter.setPower(0);
+        secondaryShooter.setPower(0);
+    }
+
+    private void sleepRobot(int miliToSleep) {
+        try {
+            sleep(miliToSleep);
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -148,53 +172,44 @@ public class Dauto extends OpMode {
 
     public void shoot() {
         canProceed = false;
+        isShooting = true;
         //shooterTimer.resetTimer();
 
-        while(!canProceed) {
-            boolean completedShooting = false;
-            spinFlywheel();
+        boolean completedShooting = false;
+        //spinFlywheel();
 
-            gate.setPosition(gateOpen);
+        gate.setPosition(gateOpen);
 
-            if(shooterAtSpeed()) {
-                try {
-                    intake.setPower(1);
-                    sleep(200);
-                    intake.setPower(0);
-                    sleep(600);
-                    intake.setPower(1);
-                    sleep(200);
-                    intake.setPower(0);
-                    sleep(600);
-                    intake.setPower(1);
-                    sleep(200);
-                    intake.setPower(0);
-                    sleep(600);
-                    intake.setPower(1);
-                    sleep(200);
-                    intake.setPower(0);
-                    sleep(600);
-                    intake.setPower(1);
-                    sleep(200);
-                    intake.setPower(0);
-                    sleep(600);
-                    intake.setPower(1);
-                    sleep(200);
-                    intake.setPower(0);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+        if(shooterAtSpeed()) {
+            try {
+                intake.setPower(1);
+                sleep(200);
+                intake.setPower(0);
+                sleep(600);
+                intake.setPower(1);
+                sleep(200);
+                intake.setPower(0);
+                sleep(600);
+                intake.setPower(1);
+                sleep(200);
+                intake.setPower(0);
+                sleep(600);
+                intake.setPower(1);
+                sleep(200);
+                intake.setPower(0);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+        }
 
-            if(pathTimer.getElapsedTime() >= 6000) {
-                completedShooting = true;
-            }
+        if(pathTimer.getElapsedTime() >= 6000) {
+            completedShooting = true;
+        }
 
-            if(completedShooting) {
-                setShooterPower(0);
-                gate.setPosition(gateClosed);
-                canProceed = true;
-            }
+        if(completedShooting) {
+            isShooting = false;
+            gate.setPosition(gateClosed);
+            canProceed = true;
         }
     }
 
@@ -204,11 +219,18 @@ public class Dauto extends OpMode {
     }
 
     public boolean shooterAtSpeed() {
-        if(primaryShooter.getVelocity() > 1150 && primaryShooter.getVelocity() < 1220) {
-            return true;
+        return primaryShooter.getVelocity() > 1150 && primaryShooter.getVelocity() < 1220;
+    }
+
+    private void shooterController() {
+        if(isShooting) {
+            spinFlywheel();
         }
         else {
-            return false;
+            setShooterPower(0);
+        }
+        if(primaryShooter.getVelocity() < 0) {
+            throw new RuntimeException("error 2: electric boogaloo - " + pathState);
         }
     }
 
@@ -225,11 +247,15 @@ public class Dauto extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
+        shooterController();
+
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addData("shooter velocity", primaryShooter.getVelocity());
+        telemetry.addData("shooter power", primaryShooter.getPower());
         telemetry.update();
     }
 
