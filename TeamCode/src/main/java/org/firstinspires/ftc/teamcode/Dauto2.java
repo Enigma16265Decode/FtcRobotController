@@ -20,15 +20,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.Map;
 
-enum ShootingStates {
-    IDLE,
-    ACCELERATING,
-    AT_SPEED,
-    SHOOTING
-}
 
-@Autonomous(name = "Rodger the auto (Red)", group = "Examples")
-public class Dauto extends OpMode {
+@Autonomous(name = "Billy the auto (Blue)", group = "Examples")
+public class Dauto2 extends OpMode {
 
     ShootingStates currentShootingState = ShootingStates.IDLE;
 
@@ -47,11 +41,12 @@ public class Dauto extends OpMode {
 
     private int pathState;
 
-    private final Pose startPose = new Pose(119, 130, Math.toRadians(35)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(79, 95, Math.toRadians(35));
-    private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
-    private final Pose stack1 = new Pose(115.5,85,toR(0));
-    private final Pose parkPose = new Pose(108,78);
+    private final Pose startPose = new Pose(25, 130, Math.toRadians(145)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(65, 95, Math.toRadians(145));
+    private final Pose beforePickupStack1 = new Pose(61, 85, toR(180));
+    private final Pose stack1 = new Pose(27.5,85,toR(180));
+    private final Pose parkPose = new Pose(33.5,78);
+
 
     double targetSpeed = 1200;
     double gateOpen = 0.2;
@@ -60,7 +55,7 @@ public class Dauto extends OpMode {
     private Path scorePreload;
     private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, park;
 
-    private double toR(double toRadian) {
+    private double toR(double toRadian) { //i may get called lazy for this but I dont care :)
         return Math.toRadians(toRadian);
     }
 
@@ -74,7 +69,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, beforePickupStack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
                 .build();
 
         pickupStack1 = follower
@@ -82,7 +77,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(beforePickupStack1, stack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         score2ndLoad = follower
@@ -90,7 +85,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(stack1, scorePose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(35))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
                 .build();
 
         park = follower
@@ -98,7 +93,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, parkPose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
                 .build();
     }
     /* You could check for
@@ -155,7 +150,7 @@ public class Dauto extends OpMode {
                 break;
             case 5:
                 stopFlywheel();
-                //follower.followPath(park); todo this
+                follower.followPath(park);
                 setPathState(-1);
         }
     }
@@ -267,6 +262,7 @@ public class Dauto extends OpMode {
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.addData("shooter velocity", primaryShooter.getVelocity());
         telemetry.addData("shooter power", primaryShooter.getPower());
+        telemetry.addData("shooter is at speed", shooterAtSpeed());
         telemetry.update();
     }
 
