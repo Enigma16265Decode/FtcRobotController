@@ -41,11 +41,11 @@ public class Dauto2 extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(25, 130, Math.toRadians(144)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(54, 93.5, Math.toRadians(144));
-    private final Pose beforePickupStack1 = new Pose(61, 85, toR(180));
-    private final Pose stack1 = new Pose(32,85,toR(180));
+    private final Pose scorePose = new Pose(53, 95, Math.toRadians(144));
+    private final Pose beforePickupStack1 = new Pose(61, 83, toR(180));
+    private final Pose stack1 = new Pose(31,83,toR(180));
     private final Pose beforePickupStack2 = new Pose(61, 60, toR(180));
-    private final Pose stack2 = new Pose(32,60,toR(180));
+    private final Pose stack2 = new Pose(31,60,toR(180));
     private final Pose parkPose = new Pose(33.5,78);
 
 
@@ -383,7 +383,7 @@ public class Dauto2 extends OpMode {
         initHardware();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setMaxPower(0.9);
+        follower.setMaxPower(0.7);
         buildPaths();
         follower.setStartingPose(startPose);
 
