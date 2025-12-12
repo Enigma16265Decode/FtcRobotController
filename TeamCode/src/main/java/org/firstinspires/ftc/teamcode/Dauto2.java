@@ -208,15 +208,6 @@ public class Dauto2 extends OpMode {
         }
     }
 
-    private void sleepRobot(int miliToSleep) {
-        try {
-            sleep(miliToSleep);
-        }
-        catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
 
 

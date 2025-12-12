@@ -49,9 +49,11 @@ public class Dauto extends OpMode {
     private int pathState;
 
     private final Pose startPose = new Pose(119, 130, Math.toRadians(35)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(79, 95, Math.toRadians(35));
+    private final Pose scorePose = new Pose(91, 95, Math.toRadians(40));
     private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
     private final Pose stack1 = new Pose(115.5,85,toR(0));
+    private final Pose beforePickupStack2 = new Pose(86, 60, toR(0)); //ee
+    private final Pose stack2 = new Pose(114,60,toR(0)); //ee
     private final Pose parkPose = new Pose(108,78);
 
     double targetSpeed = 1200;
@@ -62,7 +64,7 @@ public class Dauto extends OpMode {
     int shootStage = 0;
 
     private Path scorePreload;
-    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, park;
+    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, park;
 
     private double toR(double toRadian) {
         return Math.toRadians(toRadian);
@@ -78,7 +80,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, beforePickupStack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(38), Math.toRadians(0))
                 .build();
 
         pickupStack1 = follower
@@ -94,15 +96,41 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(stack1, scorePose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(35))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(38))
                 .build();
+
+        moveToBeforeStack2 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(scorePose, beforePickupStack2)
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(38), Math.toRadians(0))
+                .build();
+
+        pickupStack2 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(beforePickupStack2, stack2)
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .build();
+
+        score3rdLoad = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(stack2, scorePose)
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(38))
+                .build();
+
+
 
         park = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(scorePose, parkPose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
+                .setLinearHeadingInterpolation(Math.toRadians(40), Math.toRadians(0))
                 .build();
     }
     /* You could check for
@@ -150,15 +178,36 @@ public class Dauto extends OpMode {
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
+                        follower.followPath(moveToBeforeStack2);
                         gate.setPosition(gateClosed);
                         setPathState(5);
                     }
                 }
-                else {
-                    //spinFlywheel();
-                }
                 break;
             case 5:
+                if(!follower.isBusy()) {
+                    intake.setPower(1);
+                    follower.followPath(pickupStack2);
+                    setPathState(6);
+                }
+                break;
+            case 6:
+                if(!follower.isBusy()) {
+                    follower.followPath(score3rdLoad);
+                    intake.setPower(0);
+                    setPathState(7);
+                }
+                break;
+            case 7:
+                if(!follower.isBusy()) {
+                    shoot();
+                    if(canProceed) {
+                        gate.setPosition(gateClosed);
+                        setPathState(8);
+                    }
+                }
+                break;
+            case 8:
                 isShooting = false;
                 stopFlywheel();
                 follower.followPath(park);
@@ -341,7 +390,7 @@ public class Dauto extends OpMode {
         initHardware();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setMaxPower(0.5);
+        follower.setMaxPower(0.7);
         buildPaths();
         follower.setStartingPose(startPose);
 
