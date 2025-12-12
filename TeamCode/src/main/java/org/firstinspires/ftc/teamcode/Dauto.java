@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -56,6 +57,9 @@ public class Dauto extends OpMode {
     double targetSpeed = 1200;
     double gateOpen = 0.2;
     double gateClosed = 0.4; //get from basic tele, was letting me nab em for some reason
+
+    ElapsedTime shootTimer = new ElapsedTime();
+    int shootStage = 0;
 
     private Path scorePreload;
     private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, park;
@@ -119,6 +123,7 @@ public class Dauto extends OpMode {
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
+                        isShooting = false;
                         stopFlywheel();
                         follower.followPath(moveToBeforeStack1);
                         gate.setPosition(gateClosed);
@@ -154,8 +159,9 @@ public class Dauto extends OpMode {
                 }
                 break;
             case 5:
+                isShooting = false;
                 stopFlywheel();
-                //follower.followPath(park); todo this
+                follower.followPath(park);
                 setPathState(-1);
         }
     }
@@ -184,43 +190,83 @@ public class Dauto extends OpMode {
     public void shoot() {
         canProceed = false;
         isShooting = true;
-        //shooterTimer.resetTimer();
-
-        boolean completedShooting = false;
-        //spinFlywheel();
 
         gate.setPosition(gateOpen);
 
-        if(shooterAtSpeed()) {
-            try {
-                intake.setPower(1);
-                sleep(200);
-                intake.setPower(0);
-                sleep(600);
-                intake.setPower(1);
-                sleep(200);
-                intake.setPower(0);
-                sleep(600);
-                intake.setPower(1);
-                sleep(200);
-                intake.setPower(0);
-                sleep(600);
-                intake.setPower(1);
-                sleep(200);
-                intake.setPower(0);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        shooterController();
+
+        // Start shooting sequence once flywheel is ready
+        if (shootStage == 0 && shooterAtSpeed()) {
+            shootTimer.reset();
+            shootStage = 1;
         }
 
-        if(pathTimer.getElapsedTime() >= 6000) {
-            completedShooting = true;
-        }
+        // Stage machine for timed intake pulses
+        switch (shootStage) {
+            case 1:
+                intake.setPower(1);
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setPower(0);
+                    shootTimer.reset();
+                    shootStage = 2;
+                }
+                break;
 
-        if(completedShooting) {
-            isShooting = false;
-            gate.setPosition(gateClosed);
-            canProceed = true;
+            case 2:
+                if (shootTimer.milliseconds() >= 600) {
+                    intake.setPower(1);
+                    shootTimer.reset();
+                    shootStage = 3;
+                }
+                break;
+
+            case 3:
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setPower(0);
+                    shootTimer.reset();
+                    shootStage = 4;
+                }
+                break;
+
+            case 4:
+                if (shootTimer.milliseconds() >= 600) {
+                    intake.setPower(1);
+                    shootTimer.reset();
+                    shootStage = 5;
+                }
+                break;
+
+            case 5:
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setPower(0);
+                    shootTimer.reset();
+                    shootStage = 6;
+                }
+                break;
+
+            case 6:
+                if (shootTimer.milliseconds() >= 600) {
+                    intake.setPower(1);
+                    shootTimer.reset();
+                    shootStage = 7;
+                }
+                break;
+
+            case 7:
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setPower(0);
+                    shootTimer.reset();
+                    shootStage = 8;
+                }
+                break;
+
+            case 8:
+                // Shooting finished
+                isShooting = false;
+                gate.setPosition(gateClosed);
+                canProceed = true;
+                shootStage = 0;  // reset for next time
+                break;
         }
     }
 
