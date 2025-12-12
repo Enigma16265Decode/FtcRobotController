@@ -32,7 +32,7 @@ public class BasicTeleOp extends OpMode {
 
     private boolean isRealigning = false;
 
-    public static double sP = 0.017, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
+    public static double sP = 0.018, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
     public static int targetSpeed = 1200;
     private final double ticksInDegree = 0;
     public double gateClosed = 0.4;
@@ -175,7 +175,7 @@ public class BasicTeleOp extends OpMode {
             }
         }
         if(gamepad1.x) {
-            if(primaryShooter.getVelocity() > 1150 && primaryShooter.getVelocity() < 1220) {
+            if(primaryShooter.getVelocity() > 1130 && primaryShooter.getVelocity() < 1220) {
                 intake.setPower(1);
             }
         }
