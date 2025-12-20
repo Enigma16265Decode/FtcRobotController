@@ -46,7 +46,6 @@ public class BasicTeleOp extends OpMode {
     private DcMotor intake;
     private DcMotor rightFront, rightRear, leftRear, leftFront;
     private Servo hoodLeft;
-    private Servo hoodRight;
     private Servo gate;
     //private GoBildaPinpointDriver pinpoint;
 
@@ -74,7 +73,6 @@ public class BasicTeleOp extends OpMode {
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
         secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
         hoodLeft = hardwareMap.get(Servo.class, "leftHood");
-        hoodRight = hardwareMap.get(Servo.class, "rightHood");
         intake = hardwareMap.get(DcMotor.class, "intake");
         gate = hardwareMap.get(Servo.class, "gate");
 
@@ -251,7 +249,6 @@ public class BasicTeleOp extends OpMode {
 
     private void setHoodPos(double value) {
         hoodLeft.setPosition(value);
-        hoodRight.setPosition(value);
     }
 
     private void hoodControl() {

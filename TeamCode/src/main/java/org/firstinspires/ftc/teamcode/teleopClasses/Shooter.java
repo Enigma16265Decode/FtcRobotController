@@ -24,7 +24,6 @@ public class Shooter {
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
     private Servo hoodLeft;
-    private Servo hoodRight;
     private Servo gate;
 
 
@@ -34,7 +33,6 @@ public class Shooter {
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
         secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
         hoodLeft = hardwareMap.get(Servo.class, "leftHood");
-        hoodRight = hardwareMap.get(Servo.class, "rightHood");
         gate = hardwareMap.get(Servo.class, "gate");
 
         hoodLeft.setDirection(Servo.Direction.REVERSE);
@@ -88,7 +86,6 @@ public class Shooter {
 
     private void setHoodPos(double value) {
         hoodLeft.setPosition(value);
-        hoodRight.setPosition(value);
     }
 
     public void hoodControl() {
