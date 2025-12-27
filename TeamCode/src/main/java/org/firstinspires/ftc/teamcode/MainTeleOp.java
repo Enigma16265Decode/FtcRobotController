@@ -11,13 +11,7 @@ import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
@@ -30,7 +24,6 @@ import java.util.function.Supplier;
 @Configurable
 @TeleOp(name = "! SC TeleOP \uD83D\uDFE5")
 public class MainTeleOp extends OpMode {
-
     Intake intake;
     Shooter shooter;
     Drive drive;
@@ -46,10 +39,10 @@ public class MainTeleOp extends OpMode {
 
     private Pose goalPose() {
         if(isRed) {
-            return new Pose(131.5, 136.5);
+            return new Pose(134.5, 140);
         }
         else {
-            return null;
+            return new Pose(9.5, 140);
         }
     }
 
@@ -71,12 +64,17 @@ public class MainTeleOp extends OpMode {
 
 
     private void telemetry() {
+        double dx = goalPose().getX() - follower.getPose().getX();
+        double dy = goalPose().getY() - follower.getPose().getY();
+        double goalHeadingRadians = Math.atan2(dy, dx);
+
         telemetry.addData("target :", shooter.targetSpeed);
         telemetry.addData("hood pos: ", shooter.getHoodPos());
         telemetry.addData("power : ", shooter.getShooterPower()); //todo figure out this madness
         telemetry.addData("shooter vel: ", shooter.getShooterVelocity());
         telemetry.addData("intake power: ", intake.getIntakePower());
         telemetry.addData("goal heading: ", kinematics.getHeadingToGoal());
+        telemetry.addData("robot/goal heading", goalHeadingRadians);
 
         telemetry.update();
     }
@@ -115,12 +113,12 @@ public class MainTeleOp extends OpMode {
 
     @Override
     public void init() {
-        shooter = new Shooter(hardwareMap, gamepad1, turret);
-        drive = new Drive(hardwareMap, gamepad1, follower);
-        kinematics = new Kinematics(shooter, follower, goalPose());
-        turret = new Turret(hardwareMap, kinematics);
-        intake = new Intake(hardwareMap, gamepad1, kinematics);
-
         initialize();
+
+        drive = new Drive(hardwareMap, gamepad1, follower); //1
+        kinematics = new Kinematics(follower, goalPose()); //2
+        turret = new Turret(hardwareMap, kinematics); //3
+        shooter = new Shooter(hardwareMap, gamepad1, turret); //4
+        intake = new Intake(hardwareMap, gamepad1, shooter); //5
     }
 }

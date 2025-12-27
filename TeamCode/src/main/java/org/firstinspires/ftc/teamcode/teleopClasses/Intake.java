@@ -8,14 +8,14 @@ public class Intake { //This also does transfer
     private DcMotor intake;
     private Gamepad gamepad1;
     private HardwareMap hardwareMap;
-    private Kinematics kinematics;
+    private Shooter shooter;
 
-    public Intake(HardwareMap hardwareMap, Gamepad gamepad1, Kinematics kinematics) {
+    public Intake(HardwareMap hardwareMap, Gamepad gamepad1, Shooter shooter) {
         intake = hardwareMap.get(DcMotor.class, "intake");
 
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
-        this.kinematics = kinematics;
+        this.shooter = shooter;
     }
 
     public void intakeController() {
@@ -31,7 +31,7 @@ public class Intake { //This also does transfer
             }
         }
         if(gamepad1.x) {
-            if(kinematics.isShooterAtSpeed()) {
+            if(shooter.isShooterAtSpeed()) {
                 intake.setPower(1);
             }
         }

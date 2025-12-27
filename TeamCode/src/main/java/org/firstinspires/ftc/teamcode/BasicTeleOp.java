@@ -35,8 +35,8 @@ public class BasicTeleOp extends OpMode {
     public static double sP = 0.018, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
     public static int targetSpeed = 1200;
     private final double ticksInDegree = 0;
-    public double gateClosed = 0.4;
-    public double gateOpen = 0.2;
+    public double gateClosed = 0.8;
+    public double gateOpen = 0.22;
 
     static TelemetryManager telemetryM;
     PIDController shooterController;
@@ -95,8 +95,7 @@ public class BasicTeleOp extends OpMode {
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         hoodLeft.setDirection(Servo.Direction.REVERSE);
-
-        primaryShooter.setDirection(DcMotorSimple.Direction.REVERSE); //again, same as above ^
+        secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);

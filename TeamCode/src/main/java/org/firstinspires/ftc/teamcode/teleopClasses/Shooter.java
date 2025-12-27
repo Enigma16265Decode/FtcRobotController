@@ -17,7 +17,7 @@ public class Shooter {
     public static double sP = 0.018, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
     public static int targetSpeed = 1200;
     public double gateClosed = 0.4;
-    public double gateOpen = 0.2;
+    public double gateOpen = 0.1;
     boolean shootToggle = false;
     PIDController shooterController;
 
@@ -35,12 +35,21 @@ public class Shooter {
         hoodLeft = hardwareMap.get(Servo.class, "leftHood");
         gate = hardwareMap.get(Servo.class, "gate");
 
+        secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
         hoodLeft.setDirection(Servo.Direction.REVERSE);
-        primaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
         this.turret = turret;
+    }
+
+    public boolean isShooterAtSpeed() {
+        if(getShooterVelocity() > 1150 && getShooterVelocity() < 1220) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public void setShooterPower(double value) {
@@ -49,7 +58,7 @@ public class Shooter {
     }
 
     public void shooterController() {
-        double currentVelocity = primaryShooter.getVelocity();
+        double currentVelocity = primaryShooter.getVelocity() * -1;
 
         if(gamepad1.b && gamepad1.bWasPressed()) {
             boolean stateBeforeToggle = shootToggle;
@@ -129,7 +138,7 @@ public class Shooter {
     }
 
     public double getShooterVelocity() {
-        return primaryShooter.getVelocity();
+        return primaryShooter.getVelocity() * -1;
     }
 
     public double getShooterPower() {
