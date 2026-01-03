@@ -16,8 +16,8 @@ public class Shooter {
     private Turret turret;
     public static double sP = 0.018, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
     public static int targetSpeed = 1200;
-    public double gateClosed = 0.4;
-    public double gateOpen = 0.1;
+    public double gateClosed = 0.5;
+    public double gateOpen = 0.0;
     boolean shootToggle = false;
     PIDController shooterController;
 
@@ -57,6 +57,7 @@ public class Shooter {
         secondaryShooter.setPower(value);
     }
 
+
     public void shooterController() {
         double currentVelocity = primaryShooter.getVelocity() * -1;
 
@@ -84,6 +85,7 @@ public class Shooter {
     public void turretController() {
         turret.setTargetBasedOnHeadingToGoal();
         turret.moveTurret();
+        turret.setOffset();
     }
 
     public void gateController() {

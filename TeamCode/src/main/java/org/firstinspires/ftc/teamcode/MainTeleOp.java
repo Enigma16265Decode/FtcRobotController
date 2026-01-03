@@ -31,7 +31,7 @@ public class MainTeleOp extends OpMode {
     Turret turret;
 
     private Follower follower;
-    public static Pose startingPose = new Pose(14,14,Math.toRadians(0));
+    public static Pose startingPose = new Pose(8,8,Math.toRadians(0));
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
 
@@ -70,11 +70,12 @@ public class MainTeleOp extends OpMode {
 
         telemetry.addData("target :", shooter.targetSpeed);
         telemetry.addData("hood pos: ", shooter.getHoodPos());
-        telemetry.addData("power : ", shooter.getShooterPower()); //todo figure out this madness
+        telemetry.addData("power : ", shooter.getShooterPower());
         telemetry.addData("shooter vel: ", shooter.getShooterVelocity());
         telemetry.addData("intake power: ", intake.getIntakePower());
         telemetry.addData("goal heading: ", kinematics.getHeadingToGoal());
         telemetry.addData("robot/goal heading", goalHeadingRadians);
+        telemetry.addData("offset: ", turret.getOffset());
 
         telemetry.update();
     }
@@ -84,12 +85,12 @@ public class MainTeleOp extends OpMode {
 
     private void masterFunction() {
         drive.fieldCentricDrive();
-        shooter.hoodControl();
+        drive.poseController();
+        //shooter.hoodControl();
         shooter.gateController();
         shooter.shooterController();
         shooter.turretController();
         intake.intakeController(); //make sure this goes after shooter controller
-
 
         telemetry();
     }
@@ -115,9 +116,9 @@ public class MainTeleOp extends OpMode {
     public void init() {
         initialize();
 
-        drive = new Drive(hardwareMap, gamepad1, follower); //1
+        drive = new Drive(hardwareMap, gamepad1, gamepad2, follower); //1
         kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, kinematics); //3
+        turret = new Turret(hardwareMap, kinematics, gamepad1, gamepad2); //3
         shooter = new Shooter(hardwareMap, gamepad1, turret); //4
         intake = new Intake(hardwareMap, gamepad1, shooter); //5
     }

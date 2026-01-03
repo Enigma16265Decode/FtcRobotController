@@ -58,7 +58,7 @@ public class TurretPIDTuner extends OpMode {
     @Override
     public void init() {
         turretController = new PIDController(kP, kI, kD);
-        turretController.setTolerance(3);
+        turretController.setTolerance(0.5);
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         turret = hardwareMap.get(DcMotorEx.class, "turret");

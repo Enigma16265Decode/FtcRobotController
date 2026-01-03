@@ -1,19 +1,22 @@
 package org.firstinspires.ftc.teamcode.teleopClasses;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Drive {
-    HardwareMap hardwareMap;
-    Gamepad gamepad1;
-    Follower follower;
+    private HardwareMap hardwareMap;
+    private Gamepad gamepad1;
+    private Gamepad gamepad2;
+
+    private Follower follower;
 
     private DcMotor rightFront, rightRear, leftRear, leftFront;
 
-    public Drive(HardwareMap hardwareMap, Gamepad gamepad1, Follower follower) {
+    public Drive(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Follower follower) {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -34,6 +37,7 @@ public class Drive {
 
         this.hardwareMap = hardwareMap;
         this.gamepad1 = gamepad1;
+        this.gamepad2 = gamepad2;
         this.follower = follower;
     }
 
@@ -75,6 +79,16 @@ public class Drive {
         //telemetryM.debug("position", follower.getPose());
         //telemetryM.debug("velocity", follower.getVelocity());
         //telemetryM.debug("automatedDrive", automatedDrive);
+    }
+
+    public void resetPose() {
+        follower.setPose(new Pose(8, 8, Math.toRadians(0)));
+    }
+
+    public void poseController() {
+        if(gamepad1.yWasPressed() || gamepad2.yWasPressed()) {
+            resetPose();
+        }
     }
 
     public void drivePOV() {
