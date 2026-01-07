@@ -19,6 +19,7 @@ public class Shooter {
     public double gateClosed = 0.5;
     public double gateOpen = 0.0;
     boolean shootToggle = false;
+    private boolean shooterStopped = false;
     PIDController shooterController;
 
     private DcMotorEx primaryShooter;
@@ -44,7 +45,7 @@ public class Shooter {
     }
 
     public boolean isShooterAtSpeed() {
-        if(getShooterVelocity() > 1150 && getShooterVelocity() < 1220) {
+        if((getShooterVelocity() > 1150) && (getShooterVelocity() < 1220)) {
             return true;
         }
         else {
@@ -57,6 +58,17 @@ public class Shooter {
         secondaryShooter.setPower(value);
     }
 
+    public void accelerateShooterPID() {
+        if (!shooterStopped) {
+            double currentVelocity = primaryShooter.getVelocity() * -1;
+            double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
+
+            setShooterPower(shooterPid);
+        }
+        else {
+            setShooterPower(0);
+        }
+    }
 
     public void shooterController() {
         double currentVelocity = primaryShooter.getVelocity() * -1;
@@ -81,6 +93,7 @@ public class Shooter {
             setShooterPower(0);
             gate.setPosition(gateClosed);
         }
+
     }
     public void turretController() {
         turret.setTargetBasedOnHeadingToGoal();
@@ -92,6 +105,10 @@ public class Shooter {
         if(gamepad1.x && gamepad1.xWasPressed()) {
             toggleGate();
         }
+    }
+
+    public void setShooterStopped(boolean stop) {
+        shooterStopped = stop;
     }
 
 
@@ -137,6 +154,14 @@ public class Shooter {
         else {
             gate.setPosition(gateClosed);
         }
+    }
+
+    public void setGateClosed() {
+        gate.setPosition(gateClosed);
+    }
+
+    public void setGateOpen() {
+        gate.setPosition(gateOpen);
     }
 
     public double getShooterVelocity() {

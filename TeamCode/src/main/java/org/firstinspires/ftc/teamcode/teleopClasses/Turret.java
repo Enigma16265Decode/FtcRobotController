@@ -17,6 +17,7 @@ public class Turret {
     PIDController turretController = new PIDController(kP, kI, kD);
     public double targetPos = 0.0;
     private double posOnInit;
+    private boolean homeOverride = false;
     private double offset = 0;
     public final double toOffset = 5;
     private double ticksPerDegree = 316.0 / 180.0;
@@ -31,6 +32,13 @@ public class Turret {
         this.gamepad2 = gamepad2;
         this.hardwareMap = hardwareMap;
         this.kinematics = kinematics;
+    }
+
+    public void setHomeOverride(boolean toSet) {
+        homeOverride = toSet;
+        if(toSet) {
+            targetPos = 0;
+        }
     }
 
     public void moveTurret() {
@@ -56,14 +64,17 @@ public class Turret {
         }
     }
 
+
     public void setTargetBasedOnHeadingToGoal() {
-        double toSet = (kinematics.getHeadingToGoal() * ticksPerDegree) - offset;
-        if (toSet < min) {
-            toSet = min;
+        if(!homeOverride) {
+            double toSet = (kinematics.getHeadingToGoal() * ticksPerDegree) - offset;
+            if (toSet < min) {
+                toSet = min;
+            }
+            if (toSet > max) {
+                toSet = max;
+            }
+            targetPos = toSet;
         }
-        if (toSet > max) {
-            toSet = max;
-        }
-        targetPos = toSet;
     }
 }

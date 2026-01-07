@@ -18,6 +18,10 @@ public class Intake { //This also does transfer
         this.shooter = shooter;
     }
 
+    public void setIntakePower(double toSet) {
+        intake.setPower(toSet);
+    }
+
     public void intakeController() {
         if(gamepad1.right_trigger > 0.4) {
             intake.setPower(1);
