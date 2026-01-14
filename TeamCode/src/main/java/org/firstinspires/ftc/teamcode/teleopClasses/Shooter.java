@@ -14,13 +14,14 @@ public class Shooter {
     private final Gamepad gamepad1;
     private final HardwareMap hardwareMap;
     private Turret turret;
-    public static double sP = 0.018, sI = 0.35 /*0.72 */, sD = 0; //we will almost certainly not change d, change p after finding good i value
+    public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1200;
-    public double gateClosed = 0.5;
+    public double gateClosed = 0.55;
     public double gateOpen = 0.0;
-    boolean shootToggle = false;
+    private boolean shootToggle = false;
+    private boolean gateToggle = false;
     private boolean shooterStopped = false;
-    PIDController shooterController;
+    private PIDController shooterController;
 
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
@@ -74,6 +75,16 @@ public class Shooter {
         double currentVelocity = primaryShooter.getVelocity() * -1;
 
         if(gamepad1.b && gamepad1.bWasPressed()) {
+            boolean stateBeforeToggle = gateToggle;
+            if(stateBeforeToggle) {
+                gateToggle = false;
+            }
+            else {
+                gateToggle = true;
+            }
+        }
+
+        if(gamepad1.right_bumper && gamepad1.rightBumperWasPressed()) {
             boolean stateBeforeToggle = shootToggle;
             if(stateBeforeToggle) {
                 shootToggle = false;
@@ -82,15 +93,19 @@ public class Shooter {
                 shootToggle = true;
             }
         }
-        if(gamepad1.right_bumper || shootToggle) {
+        if(shootToggle) {
             shooterController.setPID(sP, sI, sD);
             double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
 
             setShooterPower(shooterPid);
-            gate.setPosition(gateOpen);
         }
         else {
             setShooterPower(0);
+        }
+        if(gateToggle) {
+            gate.setPosition(gateOpen);
+        }
+        else {
             gate.setPosition(gateClosed);
         }
 

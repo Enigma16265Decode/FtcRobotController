@@ -31,7 +31,7 @@ public class MainTeleOp extends OpMode {
     Turret turret;
 
     private Follower follower;
-    public static Pose startingPose = new Pose(8,8,Math.toRadians(0));
+    private static final Pose startingPose = new Pose(105,72, Math.toRadians(0));
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
 
@@ -118,7 +118,7 @@ public class MainTeleOp extends OpMode {
 
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower); //1
         kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, kinematics, gamepad1, gamepad2); //3
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, false); //3
         shooter = new Shooter(hardwareMap, gamepad1, turret); //4
         intake = new Intake(hardwareMap, gamepad1, shooter); //5
     }

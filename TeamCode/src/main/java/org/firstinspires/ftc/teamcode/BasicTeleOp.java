@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp(name = "! FC TeleOP \uD83D\uDFE5")
+@TeleOp(name = "FC TeleOP")
 public class BasicTeleOp extends OpMode {
     private Follower follower;
     public static Pose startingPose = new Pose(14,14,Math.toRadians(0));

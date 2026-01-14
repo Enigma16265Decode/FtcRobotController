@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
-import static java.lang.Thread.sleep;
-
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -11,55 +8,62 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
+import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
+import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
+import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
-
-@Autonomous(name = "Billy the auto (Blue)", group = "Examples")
+@Autonomous(name = "Bob the auto (Blu)", group = "Examples")
 public class Dauto2 extends OpMode {
+
+    Intake intake;
+    Shooter shooter;
+    Kinematics kinematics;
+    Turret turret;
 
     ShootingStates currentShootingState = ShootingStates.IDLE;
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, shooterTimer;
 
-    public static double sP = BasicTeleOp.sP, sI = BasicTeleOp.sI, sD = BasicTeleOp.sD;
-    PIDController shooterController;
-    private DcMotorEx primaryShooter;
-    private DcMotor secondaryShooter;
-    private DcMotor intake;
-    private Servo gate;
+
+    boolean isRed = false;
+    private Pose goalPose() {
+        if(isRed) {
+            return new Pose(134.5, 140);
+        }
+        else {
+            return new Pose(9.5, 140);
+        }
+    }
 
     private boolean canProceed;
-    private boolean isShooting = false;
 
     private int pathState;
 
-    private final Pose startPose = new Pose(25, 130, Math.toRadians(144)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(53, 95, Math.toRadians(144));
-    private final Pose beforePickupStack1 = new Pose(61, 83, toR(180));
-    private final Pose stack1 = new Pose(31,83,toR(180));
-    private final Pose beforePickupStack2 = new Pose(61, 60, toR(180));
-    private final Pose stack2 = new Pose(31,60,toR(180));
-    private final Pose parkPose = new Pose(33.5,78);
+    private final double intakeDriveSpeed = 0.85, normalDriveSpeed = 1;
 
+    private final Pose startPose = new Pose(25.0,130.0,Math.toRadians(42.0)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(64.5,92.0,Math.toRadians(42.0));
+    private final Pose beforePickupStack1 = new Pose(63.0,85.0,Math.toRadians(180.0));
+    private final Pose stack1 = new Pose(19.0,85.0,Math.toRadians(180.0));
+    private final Pose beforePickupStack2 = new Pose(58.0,62.0,Math.toRadians(180.0)); //ee
+    private final Pose stack2 = new Pose(20.0,62.0,Math.toRadians(180.0)); //ee
+    private final Pose beforePickupStack3 = new Pose(58.0,37.0,Math.toRadians(180.0));
+    private final Pose stack3 = new Pose(20.0,37.0,Math.toRadians(180.0));
+    private final Pose parkPose = new Pose(39.0,72.0,Math.toRadians(180.0));
 
-    double targetSpeed = 1200;
-    double gateOpen = 0.2;
-    double gateClosed = 0.4; //get from basic tele, was letting me nab em for some reason
 
     ElapsedTime shootTimer = new ElapsedTime();
     int shootStage = 0;
 
     private Path scorePreload;
-    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, park;
+    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, moveToBeforeStack3, pickupStack3, score4thLoad, park;
 
-    private double toR(double toRadian) { //i may get called lazy for this but I dont care :)
+    private double toR(double toRadian) {
         return Math.toRadians(toRadian);
     }
 
@@ -73,7 +77,7 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, beforePickupStack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack1.getHeading())
                 .build();
 
         pickupStack1 = follower
@@ -81,7 +85,7 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(beforePickupStack1, stack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(beforePickupStack1.getHeading(), stack1.getHeading())
                 .build();
 
         score2ndLoad = follower
@@ -89,7 +93,7 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(stack1, scorePose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+                .setLinearHeadingInterpolation(stack1.getHeading(), scorePose.getHeading())
                 .build();
 
         moveToBeforeStack2 = follower
@@ -97,7 +101,7 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, beforePickupStack2)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack2.getHeading())
                 .build();
 
         pickupStack2 = follower
@@ -105,7 +109,7 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(beforePickupStack2, stack2)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                .setLinearHeadingInterpolation(beforePickupStack2.getHeading(), stack2.getHeading())
                 .build();
 
         score3rdLoad = follower
@@ -113,17 +117,39 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(stack2, scorePose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+                .setLinearHeadingInterpolation(stack2.getHeading(), scorePose.getHeading())
                 .build();
 
+        moveToBeforeStack3 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(scorePose, beforePickupStack3)
+                )
+                .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack3.getHeading())
+                .build();
 
+        pickupStack3 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(beforePickupStack3, stack3)
+                )
+                .setLinearHeadingInterpolation(beforePickupStack3.getHeading(), stack3.getHeading())
+                .build();
+
+        score4thLoad = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(stack3, scorePose)
+                )
+                .setLinearHeadingInterpolation(stack3.getHeading(), scorePose.getHeading())
+                .build();
 
         park = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(scorePose, parkPose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                .setLinearHeadingInterpolation(Math.toRadians(220), Math.toRadians(0))
                 .build();
     }
     /* You could check for
@@ -135,35 +161,35 @@ public class Dauto2 extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
+                shooter.accelerateShooterPID();
                 setPathState(1);
                 break;
             case 1:
-                if(follower.isBusy()) {
-                    //spinFlywheel();
-                }
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
-                        isShooting = false;
-                        stopFlywheel();
                         follower.followPath(moveToBeforeStack1);
-                        gate.setPosition(gateClosed);
                         setPathState(2);
                     }
                     break;
                 }
             case 2:
                 if(!follower.isBusy() /*follower.atPose(beforePickupStack1, 8, 3, toR(20))*/) {
-                    intake.setPower(1);
+                    shooter.accelerateShooterPID();
+
+                    intake.setIntakePower(1);
+                    follower.setMaxPower(intakeDriveSpeed);
                     follower.followPath(pickupStack1);
                     setPathState(3);
                 }
                 break;
             case 3:
                 if(!follower.isBusy()) {
-                    //sleepRobot(300);
+                    shooter.accelerateShooterPID();
+
+                    follower.setMaxPower(normalDriveSpeed);
                     follower.followPath(score2ndLoad);
-                    intake.setPower(0);
+                    intake.setIntakePower(0);
                     setPathState(4);
                 }
                 break;
@@ -172,22 +198,27 @@ public class Dauto2 extends OpMode {
                     shoot();
                     if(canProceed) {
                         follower.followPath(moveToBeforeStack2);
-                        gate.setPosition(gateClosed);
                         setPathState(5);
                     }
                 }
                 break;
             case 5:
                 if(!follower.isBusy()) {
-                    intake.setPower(1);
+                    shooter.accelerateShooterPID();
+
+                    intake.setIntakePower(1);
+                    follower.setMaxPower(intakeDriveSpeed);
                     follower.followPath(pickupStack2);
                     setPathState(6);
                 }
                 break;
             case 6:
                 if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
+                    follower.setMaxPower(normalDriveSpeed);
                     follower.followPath(score3rdLoad);
-                    intake.setPower(0);
+                    intake.setIntakePower(0);
                     setPathState(7);
                 }
                 break;
@@ -195,33 +226,59 @@ public class Dauto2 extends OpMode {
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
-                        gate.setPosition(gateClosed);
+                        follower.followPath(moveToBeforeStack3);
                         setPathState(8);
                     }
                 }
                 break;
             case 8:
-                isShooting = false;
-                stopFlywheel();
+                if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
+                    intake.setIntakePower(1);
+                    follower.setMaxPower(intakeDriveSpeed);
+                    follower.followPath(pickupStack3);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
+                    follower.setMaxPower(normalDriveSpeed);
+                    follower.followPath(score4thLoad);
+                    intake.setIntakePower(0);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if(!follower.isBusy()) {
+                    shoot();
+                    shooter.setShooterStopped(false);
+                    if(canProceed) {
+                        setPathState(11);
+                    }
+                }
+                break;
+            case 11:
+                shooter.setShooterStopped(true);
                 follower.followPath(park);
                 setPathState(-1);
         }
+        shooter.accelerateShooterPID();
+        turret.moveTurret();
     }
-
-
-
 
 
     public void shoot() {
         canProceed = false;
-        isShooting = true;
 
-        gate.setPosition(gateOpen);
-
-        shooterController();
+        shooter.accelerateShooterPID();
+        shooter.setGateOpen();
 
         // Start shooting sequence once flywheel is ready
-        if (shootStage == 0 && shooterAtSpeed()) {
+        if (shootStage == 0 && shooter.isShooterAtSpeed()) {
+            intake.setIntakePower(0);
             shootTimer.reset();
             shootStage = 1;
         }
@@ -229,66 +286,107 @@ public class Dauto2 extends OpMode {
         // Stage machine for timed intake pulses
         switch (shootStage) {
             case 1:
-                intake.setPower(1);
-                if (shootTimer.milliseconds() >= 200) {
-                    intake.setPower(0);
+                if(shootTimer.milliseconds() >= 1000) {
                     shootTimer.reset();
                     shootStage = 2;
                 }
                 break;
-
             case 2:
-                if (shootTimer.milliseconds() >= 600) {
-                    intake.setPower(1);
+                intake.setIntakePower(1);
+                if (shootTimer.milliseconds() >= 2000) {
+                    intake.setIntakePower(0);
+                    shootTimer.reset();
+                    // Shooting finished
+                    shooter.setGateClosed();
+                    canProceed = true;
+                    shootStage = 0;  // reset for next time
+                    break;
+                }
+                break;
+        }
+    }
+
+    public void shootOld() {
+        canProceed = false;
+
+        shooter.accelerateShooterPID();
+        shooter.setGateOpen();
+
+        // Start shooting sequence once flywheel is ready
+        if (shootStage == 0 && shooter.isShooterAtSpeed()) {
+            intake.setIntakePower(0);
+            shootTimer.reset();
+            shootStage = 1;
+        }
+
+        // Stage machine for timed intake pulses
+        switch (shootStage) {
+            case 1:
+                if(shootTimer.milliseconds() >= 1000) {
+                    shootTimer.reset();
+                    shootStage = 2;
+                }
+                break;
+            case 2:
+                intake.setIntakePower(1);
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setIntakePower(0);
                     shootTimer.reset();
                     shootStage = 3;
                 }
                 break;
 
             case 3:
-                if (shootTimer.milliseconds() >= 200) {
-                    intake.setPower(0);
+                if (shootTimer.milliseconds() >= 600) {
+                    intake.setIntakePower(1);
                     shootTimer.reset();
                     shootStage = 4;
                 }
                 break;
 
             case 4:
-                if (shootTimer.milliseconds() >= 600) {
-                    intake.setPower(1);
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setIntakePower(0);
                     shootTimer.reset();
                     shootStage = 5;
                 }
                 break;
 
             case 5:
-                if (shootTimer.milliseconds() >= 200) {
-                    intake.setPower(0);
+                if (shootTimer.milliseconds() >= 600) {
+                    intake.setIntakePower(1);
                     shootTimer.reset();
                     shootStage = 6;
                 }
                 break;
 
             case 6:
-                if (shootTimer.milliseconds() >= 600) {
-                    intake.setPower(1);
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setIntakePower(0);
                     shootTimer.reset();
                     shootStage = 7;
                 }
                 break;
 
             case 7:
-                if (shootTimer.milliseconds() >= 200) {
-                    intake.setPower(0);
+                if (shootTimer.milliseconds() >= 600) {
+                    intake.setIntakePower(1);
                     shootTimer.reset();
                     shootStage = 8;
                 }
                 break;
 
             case 8:
+                if (shootTimer.milliseconds() >= 200) {
+                    intake.setIntakePower(0);
+                    shootTimer.reset();
+                    shootStage = 9;
+                }
+                break;
+
+            case 9:
                 // Shooting finished
-                isShooting = false;
-                gate.setPosition(gateClosed);
+                shooter.setGateClosed();
                 canProceed = true;
                 shootStage = 0;  // reset for next time
                 break;
@@ -296,32 +394,8 @@ public class Dauto2 extends OpMode {
     }
 
 
-    private void setShooterPower(double value) {
-        primaryShooter.setPower(value);
-        secondaryShooter.setPower(value);
-    }
 
-    public boolean shooterAtSpeed() {
-        return primaryShooter.getVelocity() > 1150 && primaryShooter.getVelocity() < 1220;
-    }
 
-    private void shooterController() {
-        if(isShooting) {
-            double currentVelocity = primaryShooter.getVelocity();
-            shooterController.setPID(sP, sI, sD);
-            double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
-
-            setShooterPower(shooterPid);
-        }
-        else {
-            setShooterPower(0);
-        }
-    }
-
-    private void stopFlywheel() {
-        primaryShooter.setPower(0);
-        secondaryShooter.setPower(0);
-    }
 
     /** These change the states of the paths and actions. It will also reset the timers of the individual switches **/
     public void setPathState(int pState) {
@@ -336,45 +410,30 @@ public class Dauto2 extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        //shooterController();
-
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.addData("shooter velocity", primaryShooter.getVelocity());
-        telemetry.addData("shooter power", primaryShooter.getPower());
-        telemetry.addData("shooter is at speed", shooterAtSpeed());
+        telemetry.addData("shooter vel: ", shooter.getShooterVelocity());
         telemetry.update();
     }
 
-    public void initHardware() {
-        shooterController = new PIDController(sP, sI, sD);
 
-        //pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        //maybe do something with telemetry I really don't know im way underqualified
-
-        primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
-        secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        gate = hardwareMap.get(Servo.class, "gate");
-
-
-        primaryShooter.setDirection(DcMotorSimple.Direction.REVERSE); //again, same as above ^
-    }
 
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
+        kinematics = new Kinematics(follower, goalPose()); //2
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true); //3
+        shooter = new Shooter(hardwareMap, gamepad1, turret); //4
+        intake = new Intake(hardwareMap, gamepad1, shooter); //5
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
-        initHardware();
-
         follower = Constants.createFollower(hardwareMap);
-        follower.setMaxPower(0.7);
         buildPaths();
         follower.setStartingPose(startPose);
 

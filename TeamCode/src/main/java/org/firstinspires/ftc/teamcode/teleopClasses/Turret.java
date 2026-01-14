@@ -22,7 +22,7 @@ public class Turret {
     public final double toOffset = 5;
     private double ticksPerDegree = 316.0 / 180.0;
     private final double max = 158, min = -158; //158, but limiting for safety
-    public Turret(HardwareMap hardwareMap, Kinematics kinematics, Gamepad gamepad1, Gamepad gamepad2) {
+    public Turret(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Kinematics kinematics, boolean homeOverride) {
         turret = hardwareMap.get(DcMotorEx.class, "turret");
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -32,14 +32,9 @@ public class Turret {
         this.gamepad2 = gamepad2;
         this.hardwareMap = hardwareMap;
         this.kinematics = kinematics;
+        this.homeOverride = homeOverride;
     }
 
-    public void setHomeOverride(boolean toSet) {
-        homeOverride = toSet;
-        if(toSet) {
-            targetPos = 0;
-        }
-    }
 
     public void moveTurret() {
         turretController.setTolerance(0.5);

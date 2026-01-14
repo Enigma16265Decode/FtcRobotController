@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
-import static java.lang.Thread.sleep;
-
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -19,8 +16,6 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
 import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
-import java.util.Map;
-
 enum ShootingStates {
     IDLE,
     ACCELERATING,
@@ -28,7 +23,7 @@ enum ShootingStates {
     SHOOTING
 }
 
-@Autonomous(name = "Rodger the auto (Red)", group = "Examples")
+@Autonomous(name = "Rudolph the auto (Red)", group = "Examples")
 public class Dauto extends OpMode {
 
     Intake intake;
@@ -56,22 +51,24 @@ public class Dauto extends OpMode {
 
     private int pathState;
 
-    private double intakeDriveSpeed = 0.5, normalDriveSpeed = 1;
+    private final double intakeDriveSpeed = 0.85, normalDriveSpeed = 1;
 
     private final Pose startPose = new Pose(119, 130, Math.toRadians(222)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(93, 100, Math.toRadians(222));
+    private final Pose scorePose = new Pose(79.5, 92, Math.toRadians(222));
     private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
-    private final Pose stack1 = new Pose(119,85,toR(0));
-    private final Pose beforePickupStack2 = new Pose(86, 60, toR(0)); //ee
-    private final Pose stack2 = new Pose(119,60,toR(0)); //ee
-    private final Pose parkPose = new Pose(108,78, toR(0));
+    private final Pose stack1 = new Pose(125,85,toR(0));
+    private final Pose beforePickupStack2 = new Pose(86, 62, toR(0)); //ee
+    private final Pose stack2 = new Pose(124,62,toR(0)); //ee
+    private final Pose beforePickupStack3 = new Pose(86, 37, toR(0));
+    private final Pose stack3 = new Pose(124,37,toR(0));
+    private final Pose parkPose = new Pose(105,72, toR(0));
 
 
     ElapsedTime shootTimer = new ElapsedTime();
     int shootStage = 0;
 
     private Path scorePreload;
-    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, park;
+    private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, moveToBeforeStack3, pickupStack3, score4thLoad, park;
 
     private double toR(double toRadian) {
         return Math.toRadians(toRadian);
@@ -87,7 +84,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, beforePickupStack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(222), Math.toRadians(0))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack1.getHeading())
                 .build();
 
         pickupStack1 = follower
@@ -95,7 +92,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(beforePickupStack1, stack1)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .setLinearHeadingInterpolation(beforePickupStack1.getHeading(), stack1.getHeading())
                 .build();
 
         score2ndLoad = follower
@@ -103,7 +100,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(stack1, scorePose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(222))
+                .setLinearHeadingInterpolation(stack1.getHeading(), scorePose.getHeading())
                 .build();
 
         moveToBeforeStack2 = follower
@@ -111,7 +108,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, beforePickupStack2)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(222), Math.toRadians(0))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack2.getHeading())
                 .build();
 
         pickupStack2 = follower
@@ -119,7 +116,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(beforePickupStack2, stack2)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .setLinearHeadingInterpolation(beforePickupStack2.getHeading(), stack2.getHeading())
                 .build();
 
         score3rdLoad = follower
@@ -127,10 +124,32 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(stack2, scorePose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(222))
+                .setLinearHeadingInterpolation(stack2.getHeading(), scorePose.getHeading())
                 .build();
 
+        moveToBeforeStack3 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(scorePose, beforePickupStack3)
+                )
+                .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack3.getHeading())
+                .build();
 
+        pickupStack3 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(beforePickupStack3, stack3)
+                )
+                .setLinearHeadingInterpolation(beforePickupStack3.getHeading(), stack3.getHeading())
+                .build();
+
+        score4thLoad = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierLine(stack3, scorePose)
+                )
+                .setLinearHeadingInterpolation(stack3.getHeading(), scorePose.getHeading())
+                .build();
 
         park = follower
                 .pathBuilder()
@@ -163,6 +182,8 @@ public class Dauto extends OpMode {
                 }
             case 2:
                 if(!follower.isBusy() /*follower.atPose(beforePickupStack1, 8, 3, toR(20))*/) {
+                    shooter.accelerateShooterPID();
+
                     intake.setIntakePower(1);
                     follower.setMaxPower(intakeDriveSpeed);
                     follower.followPath(pickupStack1);
@@ -171,6 +192,8 @@ public class Dauto extends OpMode {
                 break;
             case 3:
                 if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
                     follower.setMaxPower(normalDriveSpeed);
                     follower.followPath(score2ndLoad);
                     intake.setIntakePower(0);
@@ -188,6 +211,8 @@ public class Dauto extends OpMode {
                 break;
             case 5:
                 if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
                     intake.setIntakePower(1);
                     follower.setMaxPower(intakeDriveSpeed);
                     follower.followPath(pickupStack2);
@@ -196,6 +221,8 @@ public class Dauto extends OpMode {
                 break;
             case 6:
                 if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
                     follower.setMaxPower(normalDriveSpeed);
                     follower.followPath(score3rdLoad);
                     intake.setIntakePower(0);
@@ -205,17 +232,48 @@ public class Dauto extends OpMode {
             case 7:
                 if(!follower.isBusy()) {
                     shoot();
-                    shooter.setShooterStopped(false);
                     if(canProceed) {
+                        follower.followPath(moveToBeforeStack3);
                         setPathState(8);
                     }
                 }
                 break;
             case 8:
+                if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
+                    intake.setIntakePower(1);
+                    follower.setMaxPower(intakeDriveSpeed);
+                    follower.followPath(pickupStack3);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if(!follower.isBusy()) {
+                    shooter.accelerateShooterPID();
+
+                    follower.setMaxPower(normalDriveSpeed);
+                    follower.followPath(score4thLoad);
+                    intake.setIntakePower(0);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if(!follower.isBusy()) {
+                    shoot();
+                    shooter.setShooterStopped(false);
+                    if(canProceed) {
+                        setPathState(11);
+                    }
+                }
+                break;
+            case 11:
                 shooter.setShooterStopped(true);
                 follower.followPath(park);
                 setPathState(-1);
         }
+        shooter.accelerateShooterPID();
+        turret.moveTurret();
     }
 
 
@@ -242,7 +300,7 @@ public class Dauto extends OpMode {
                 break;
             case 2:
                 intake.setIntakePower(1);
-                if (shootTimer.milliseconds() >= 3000) {
+                if (shootTimer.milliseconds() >= 2000) {
                     intake.setIntakePower(0);
                     shootTimer.reset();
                     // Shooting finished
@@ -359,8 +417,6 @@ public class Dauto extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        turret.setHomeOverride(true);
-
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -376,7 +432,7 @@ public class Dauto extends OpMode {
     @Override
     public void init() {
         kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, kinematics, gamepad1, gamepad2); //3
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true); //3
         shooter = new Shooter(hardwareMap, gamepad1, turret); //4
         intake = new Intake(hardwareMap, gamepad1, shooter); //5
 
