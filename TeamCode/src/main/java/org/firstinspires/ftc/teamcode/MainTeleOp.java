@@ -42,7 +42,7 @@ public class MainTeleOp extends OpMode {
             return new Pose(134.5, 140);
         }
         else {
-            return new Pose(134.5, 4);
+            return new Pose(9.5, 140);
         }
     }
 
@@ -73,7 +73,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("power : ", shooter.getShooterPower());
         telemetry.addData("(1200) shooter vel: ", shooter.getShooterVelocity());
         //telemetry.addData("intake power: ", intake.getIntakePower());
-        telemetry.addData("goal heading: ", kinematics.getHeadingToGoal());
+        //telemetry.addData("goal heading: ", kinematics.getHeadingToGoal(isRed));
         //telemetry.addData("robot/goal heading", goalHeadingRadians);
         telemetry.addData("offset: ", turret.getOffset());
 
@@ -89,7 +89,7 @@ public class MainTeleOp extends OpMode {
         //shooter.hoodControl();
         shooter.gateController();
         shooter.shooterController();
-        shooter.turretController();
+        shooter.turretController(isRed);
         intake.intakeController(); //make sure this goes after shooter controller
 
         telemetry();

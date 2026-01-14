@@ -110,8 +110,8 @@ public class Shooter {
         }
 
     }
-    public void turretController() {
-        turret.setTargetBasedOnHeadingToGoal();
+    public void turretController(boolean isRed) {
+        turret.setTargetBasedOnHeadingToGoal(isRed);
         turret.moveTurret();
         turret.setOffset();
     }

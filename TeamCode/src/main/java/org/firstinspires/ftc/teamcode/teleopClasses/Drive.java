@@ -86,7 +86,8 @@ public class Drive {
             follower.setPose(new Pose(8, 8, Math.toRadians(0)));
         }
         else {
-            follower.setPose(new Pose(8, 8, Math.toRadians(0)));
+            follower.setPose(new Pose(136, 8, Math.toRadians(180)));
+            //follower.setPose(new Pose(136, 8, Math.toRadians(180)));
         }
     }
 

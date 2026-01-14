@@ -60,9 +60,9 @@ public class Turret {
     }
 
 
-    public void setTargetBasedOnHeadingToGoal() {
+    public void setTargetBasedOnHeadingToGoal(boolean isRed) {
         if(!homeOverride) {
-            double toSet = (kinematics.getHeadingToGoal() * ticksPerDegree) - offset;
+            double toSet = (kinematics.getHeadingToGoal(isRed) * ticksPerDegree) - offset;
             if (toSet < min) {
                 toSet = min;
             }
