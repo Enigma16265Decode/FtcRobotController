@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.bylazar.telemetry.PanelsTelemetry;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
@@ -22,8 +22,8 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp(name = "! SC TeleOP \uD83D\uDFE5")
-public class MainTeleOp extends OpMode {
+@TeleOp(name = "! SC TeleOP \uD83D\uDFE6")
+public class MainTeleOp2 extends OpMode {
     Intake intake;
     Shooter shooter;
     Drive drive;
@@ -31,11 +31,11 @@ public class MainTeleOp extends OpMode {
     Turret turret;
 
     private Follower follower;
-    private static final Pose startingPose = new Pose(105,72, Math.toRadians(0));
+    private static final Pose startingPose = new Pose(105,72.0,Math.toRadians(0.0));
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
 
-    private final boolean isRed = true;
+    private final boolean isRed = false;
 
     private Pose goalPose() {
         if(isRed) {

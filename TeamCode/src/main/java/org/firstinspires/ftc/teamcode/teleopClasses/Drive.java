@@ -81,13 +81,18 @@ public class Drive {
         //telemetryM.debug("automatedDrive", automatedDrive);
     }
 
-    public void resetPose() {
-        follower.setPose(new Pose(8, 8, Math.toRadians(0)));
+    public void resetPose(boolean red) {
+        if(red) {
+            follower.setPose(new Pose(8, 8, Math.toRadians(0)));
+        }
+        else {
+            follower.setPose(new Pose(8, 8, Math.toRadians(0)));
+        }
     }
 
-    public void poseController() {
+    public void poseController(boolean red) {
         if(gamepad1.yWasPressed() || gamepad2.yWasPressed()) {
-            resetPose();
+            resetPose(red);
         }
     }
 
