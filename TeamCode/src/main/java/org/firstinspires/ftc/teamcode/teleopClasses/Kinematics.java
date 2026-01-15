@@ -37,20 +37,14 @@ public class Kinematics { //this does a lot of the calculations/logic
         }
     }
 
-    public double getHeadingToGoal(double isRed) {
+    public double getHeadingToGoal(boolean isRed) {
         Pose effectiveGoalPose = new Pose(
                 goalPose.getX() /*+ follower.getVelocity().getXComponent()*/,
                 goalPose.getY() /*+ follower.getVelocity().getYComponent()*/);
         double dx = effectiveGoalPose.getX() - follower.getPose().getX();
         double dy = effectiveGoalPose.getY() - follower.getPose().getY();
         double goalHeadingRadians = Math.atan2(dy, dx);
-        double robotHeadingRadians;
-        if(isRed) {
-            robotHeadingRadians = follower.getHeading(); //this is in radians
-        }
-        else {
-            robotHeadingRadians = follower.getHeading() + Math.PI; //this is in radians
-        }
+        double robotHeadingRadians = follower.getHeading(); //this is in radians
         double turretHeadingRadians = goalHeadingRadians - (robotHeadingRadians - Math.PI);
         double turretHeadingDegrees = Math.toDegrees(turretHeadingRadians);
 

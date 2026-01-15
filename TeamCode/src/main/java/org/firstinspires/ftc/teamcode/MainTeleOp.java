@@ -42,7 +42,7 @@ public class MainTeleOp extends OpMode {
             return new Pose(134.5, 140);
         }
         else {
-            return new Pose(9.5, 140);
+            return new Pose(134.5, 9.5);
         }
     }
 

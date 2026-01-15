@@ -46,8 +46,8 @@ public class Dauto2 extends OpMode {
 
     private final double intakeDriveSpeed = 0.85, normalDriveSpeed = 1;
 
-    private final Pose startPose = new Pose(25.0,130.0,Math.toRadians(42.0)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(64.5,92.0,Math.toRadians(42.0));
+    private final Pose startPose = new Pose(25.0,130.0,Math.toRadians(132.0)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(64.5,92.0,Math.toRadians(132.0));
     private final Pose beforePickupStack1 = new Pose(63.0,85.0,Math.toRadians(180.0));
     private final Pose stack1 = new Pose(19.0,85.0,Math.toRadians(180.0));
     private final Pose beforePickupStack2 = new Pose(58.0,62.0,Math.toRadians(180.0)); //ee
@@ -149,7 +149,7 @@ public class Dauto2 extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, parkPose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(220), Math.toRadians(0))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading())
                 .build();
     }
     /* You could check for
