@@ -171,7 +171,7 @@ public class Dauto2 extends OpMode {
                         follower.followPath(moveToBeforeStack1);
                         setPathState(2);
                     }
-                    break;
+                    break; //important maybe this
                 }
             case 2:
                 if(!follower.isBusy() /*follower.atPose(beforePickupStack1, 8, 3, toR(20))*/) {

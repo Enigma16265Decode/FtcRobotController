@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
 
 @Configurable
-@TeleOp(name = "turret pid guy")
+@TeleOp(name = "Turret Tuner")
 public class TurretPIDTuner extends OpMode {
     private TelemetryManager telemetryM;
     private DcMotorEx turret;

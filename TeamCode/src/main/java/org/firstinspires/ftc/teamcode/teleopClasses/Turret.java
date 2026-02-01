@@ -13,13 +13,13 @@ public class Turret {
     private DcMotorEx turret;
     private Gamepad gamepad1;
     private Gamepad gamepad2;
-    public static double kP = 0.05, kI = 0.0, kD = 0.0007; //0.04 & 0.0015
+    private static double kP = 0.011, kI = 0.0, kD = 0.0007; //0.04 & 0.0015
     PIDController turretController = new PIDController(kP, kI, kD);
-    public double targetPos = 0.0;
+    private double targetPos = 0.0;
     private double posOnInit;
     private boolean homeOverride = false;
     private double offset = 0;
-    public final double toOffset = 5;
+    private final double toOffset = 5;
     private double ticksPerDegree = 316.0 / 180.0;
     private final double max = 158, min = -158; //158, but limiting for safety
     public Turret(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Kinematics kinematics, boolean homeOverride) {
