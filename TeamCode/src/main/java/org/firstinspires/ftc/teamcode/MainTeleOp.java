@@ -69,7 +69,7 @@ public class MainTeleOp extends OpMode {
         double goalHeadingRadians = Math.atan2(dy, dx);
 
         //telemetry.addData("target :", shooter.targetSpeed);
-        //telemetry.addData("hood pos: ", shooter.getHoodPos());
+        telemetry.addData("hood pos: ", shooter.getHoodPos());
         telemetry.addData("power : ", shooter.getShooterPower());
         telemetry.addData("(1200) shooter vel: ", shooter.getShooterVelocity());
         //telemetry.addData("intake power: ", intake.getIntakePower());
@@ -91,6 +91,7 @@ public class MainTeleOp extends OpMode {
         shooter.shooterController();
         shooter.turretController(isRed);
         intake.intakeController(); //make sure this goes after shooter controller
+        shooter.hoodControl();
 
         telemetry();
     }
@@ -105,6 +106,7 @@ public class MainTeleOp extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive();
+        shooter.initHood();
     }
 
     @Override

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(12.6)
+            .mass(13) //old was tuned on 12.6 but true weight was 12.8
             .forwardZeroPowerAcceleration(-33.449)
             .lateralZeroPowerAcceleration(-64.993)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.025))

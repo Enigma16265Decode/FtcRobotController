@@ -15,9 +15,9 @@ public class Shooter {
     private final HardwareMap hardwareMap;
     private Turret turret;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
-    public static int targetSpeed = 1200;
-    public double gateClosed = 0.55;
-    public double gateOpen = 0.0;
+    public static int targetSpeed = 1100;
+    public double gateClosed = 0.0;
+    public double gateOpen = 0.9;
     private boolean shootToggle = false;
     private boolean gateToggle = false;
     private boolean shooterStopped = false;
@@ -57,6 +57,10 @@ public class Shooter {
     public void setShooterPower(double value) {
         primaryShooter.setPower(value);
         secondaryShooter.setPower(value);
+    }
+
+    public void initHood() {
+        setHoodPos(0.5);
     }
 
     public void accelerateShooterPID() {
@@ -132,12 +136,14 @@ public class Shooter {
     }
 
     public void hoodControl() {
-        double amountToMove = 0.05;
+        final double lowestValue = 0.2;
+        final double highestValue = 1.0;
+        final double amountToMove = 0.05;
 
         if(gamepad1.dpad_right && gamepad1.dpadRightWasPressed()) {
             double toSet = (hoodLeft.getPosition() - amountToMove);
-            if (toSet < 0.15) {
-                setHoodPos(0.15);
+            if (toSet < lowestValue) {
+                setHoodPos(lowestValue);
             }
             else {
                 setHoodPos(toSet);
@@ -146,8 +152,8 @@ public class Shooter {
         if(gamepad1.dpad_left && gamepad1.dpadLeftWasPressed()) {
             double toSet = (hoodLeft.getPosition() + amountToMove);
 
-            if (toSet > 1) {
-                setHoodPos(1);
+            if (toSet > highestValue) {
+                setHoodPos(highestValue);
             }
             else {
                 setHoodPos(toSet);

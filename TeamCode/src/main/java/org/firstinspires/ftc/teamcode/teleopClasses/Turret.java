@@ -51,10 +51,10 @@ public class Turret {
     }
 
     public void setOffset() {
-        if(gamepad1.dpadLeftWasPressed() || gamepad2.dpadLeftWasPressed()) {
+        if(gamepad1.dpadUpWasPressed() || gamepad2.dpadLeftWasPressed()) {
             offset -= toOffset;
         }
-        if(gamepad1.dpadRightWasPressed() || gamepad2.dpadRightWasPressed()) {
+        if(gamepad1.dpadUpWasPressed() || gamepad2.dpadRightWasPressed()) {
             offset += toOffset;
         }
     }

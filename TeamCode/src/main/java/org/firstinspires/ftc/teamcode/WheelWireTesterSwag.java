@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "wheel tester swag")
 public class WheelWireTesterSwag extends OpMode {
-    String wheel1Name = "leftRear", wheel2Name = "leftFront", wheel3Name = "rightRear", wheel4Name = "rightFront";
+    String wheel1Name = "leftShooter", wheel2Name = "leftFront", wheel3Name = "rightRear", wheel4Name = "rightFront";
     DcMotor wheel1, wheel2, wheel3, wheel4;
 
     @Override
