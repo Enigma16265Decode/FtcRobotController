@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.tuners;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.bylazar.configurables.annotations.Configurable;
@@ -7,12 +7,9 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
 
 @Configurable
-@TeleOp(name = "Turret Tuner")
+@TeleOp(name = "Turret Tuner", group = "tuners")
 public class TurretPIDTuner extends OpMode {
     private TelemetryManager telemetryM;
     private DcMotorEx turret;

@@ -10,14 +10,24 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.util.Map;
+
+
+enum ShootingRanges {
+    CLOSE,
+    FAR
+}
 public class Shooter {
+    private double closeSpeed = 1100, farSpeed = 1430;
+    private double closeHood = 0.9, farHood = 0.4;
+    ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1;
     private final HardwareMap hardwareMap;
     private Turret turret;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1100;
-    public double gateClosed = 0.0;
-    public double gateOpen = 0.9;
+    public double gateClosed = 0.9;
+    public double gateOpen = 0.07;
     private boolean shootToggle = false;
     private boolean gateToggle = false;
     private boolean shooterStopped = false;
@@ -59,8 +69,24 @@ public class Shooter {
         secondaryShooter.setPower(value);
     }
 
+    public void toggleShootingRange() {
+        ShootingRanges initialState = shootingRange;
+        if (gamepad1.leftBumperWasPressed()) {
+            if(initialState == ShootingRanges.CLOSE) {
+                shootingRange = ShootingRanges.FAR;
+            }
+            if(initialState == ShootingRanges.FAR) {
+                shootingRange = ShootingRanges.CLOSE;
+            }
+        }
+    }
+
+    public ShootingRanges getShootingRange() {
+        return shootingRange;
+    }
+
     public void initHood() {
-        setHoodPos(0.5);
+        setHoodPos(0.9);
     }
 
     public void accelerateShooterPID() {

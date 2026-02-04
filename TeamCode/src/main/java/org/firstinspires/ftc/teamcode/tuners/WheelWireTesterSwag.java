@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.tuners;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
-@TeleOp(name = "wheel tester swag")
+@TeleOp(name = "wheel tester swag", group = "tuners")
 public class WheelWireTesterSwag extends OpMode {
     String wheel1Name = "leftShooter", wheel2Name = "leftFront", wheel3Name = "rightRear", wheel4Name = "rightFront";
     DcMotor wheel1, wheel2, wheel3, wheel4;

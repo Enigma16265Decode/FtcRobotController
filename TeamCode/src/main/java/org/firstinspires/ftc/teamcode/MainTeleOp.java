@@ -39,10 +39,10 @@ public class MainTeleOp extends OpMode {
 
     private Pose goalPose() {
         if(isRed) {
-            return new Pose(134.5, 140);
+            return new Pose(136.5, 142.5);
         }
         else {
-            return new Pose(134.5, 9.5);
+            return new Pose(136.5, 142.5-72);
         }
     }
 
@@ -69,13 +69,14 @@ public class MainTeleOp extends OpMode {
         double goalHeadingRadians = Math.atan2(dy, dx);
 
         //telemetry.addData("target :", shooter.targetSpeed);
-        telemetry.addData("hood pos: ", shooter.getHoodPos());
-        telemetry.addData("power : ", shooter.getShooterPower());
+        telemetry.addData("Hood Pos: ", shooter.getHoodPos());
+        telemetry.addData("Shooter Power : ", shooter.getShooterPower());
         telemetry.addData("(1200) shooter vel: ", shooter.getShooterVelocity());
         //telemetry.addData("intake power: ", intake.getIntakePower());
         //telemetry.addData("goal heading: ", kinematics.getHeadingToGoal(isRed));
         //telemetry.addData("robot/goal heading", goalHeadingRadians);
-        telemetry.addData("offset: ", turret.getOffset());
+        telemetry.addData("Turret Offset: ", turret.getOffset());
+        telemetry.addData("Shooting Range: ", shooter.getShootingRange());
 
         telemetry.update();
     }
