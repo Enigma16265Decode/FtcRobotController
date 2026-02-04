@@ -18,7 +18,7 @@ enum ShootingRanges {
     FAR
 }
 public class Shooter {
-    private double closeSpeed = 1100, farSpeed = 1430;
+    private int closeSpeed = 1100, farSpeed = 1430;
     private double closeHood = 0.9, farHood = 0.4;
     ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1;
@@ -71,13 +71,25 @@ public class Shooter {
 
     public void toggleShootingRange() {
         ShootingRanges initialState = shootingRange;
-        if (gamepad1.leftBumperWasPressed()) {
+        if (gamepad1.xWasPressed()) {
             if(initialState == ShootingRanges.CLOSE) {
                 shootingRange = ShootingRanges.FAR;
             }
             if(initialState == ShootingRanges.FAR) {
                 shootingRange = ShootingRanges.CLOSE;
             }
+            setHardwareShootingState();
+        }
+    }
+
+    public void setHardwareShootingState() {
+        if(shootingRange == ShootingRanges.CLOSE) {
+            targetSpeed = closeSpeed;
+            setHoodPos(closeHood);
+        }
+        if(shootingRange == ShootingRanges.FAR) {
+            targetSpeed = farSpeed;
+            setHoodPos(farHood);
         }
     }
 
@@ -147,7 +159,7 @@ public class Shooter {
     }
 
     public void gateController() {
-        if(gamepad1.x && gamepad1.xWasPressed()) {
+        if(gamepad1.bWasPressed()) {
             toggleGate();
         }
     }
@@ -215,11 +227,24 @@ public class Shooter {
         return primaryShooter.getVelocity() * -1;
     }
 
+    public String getShootingRangeString() {
+        if(shootingRange == ShootingRanges.CLOSE) {
+            return "Close";
+        }
+        if (shootingRange == ShootingRanges.FAR) {
+            return "Far";
+        }
+        return null;
+    }
+
     public double getShooterPower() {
         return primaryShooter.getPower();
     }
 
     public double getHoodPos() {
         return hoodLeft.getPosition();
+    }
+    public double getGatePos() {
+        return gate.getPosition();
     }
 }

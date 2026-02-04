@@ -76,7 +76,8 @@ public class MainTeleOp extends OpMode {
         //telemetry.addData("goal heading: ", kinematics.getHeadingToGoal(isRed));
         //telemetry.addData("robot/goal heading", goalHeadingRadians);
         telemetry.addData("Turret Offset: ", turret.getOffset());
-        telemetry.addData("Shooting Range: ", shooter.getShootingRange());
+        telemetry.addData("Shooting Range: ", shooter.getShootingRangeString());
+        telemetry.addData("Gate Pos", shooter.getGatePos());
 
         telemetry.update();
     }
@@ -88,6 +89,7 @@ public class MainTeleOp extends OpMode {
         drive.fieldCentricDrive();
         drive.poseController(isRed);
         //shooter.hoodControl();
+        shooter.toggleShootingRange();
         shooter.gateController();
         shooter.shooterController();
         shooter.turretController(isRed);
