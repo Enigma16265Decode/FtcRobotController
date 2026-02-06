@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import java.util.Map;
 
 
 enum ShootingRanges {
@@ -18,8 +17,8 @@ enum ShootingRanges {
     FAR
 }
 public class Shooter {
-    private int closeSpeed = 1100, farSpeed = 1430;
-    private double closeHood = 0.9, farHood = 0.4;
+    private int closeSpeed = 1100, farSpeed = 1460;
+    private double closeHood = 0.85, farHood = 0.4;
     ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1;
     private final HardwareMap hardwareMap;
@@ -37,6 +36,10 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hoodLeft;
     private Servo gate;
+
+    private void edada() {
+
+    }
 
 
     public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret) {
@@ -116,6 +119,7 @@ public class Shooter {
     public void shooterController() {
         double currentVelocity = primaryShooter.getVelocity() * -1;
 
+
         if(gamepad1.b && gamepad1.bWasPressed()) {
             boolean stateBeforeToggle = gateToggle;
             if(stateBeforeToggle) {
@@ -125,6 +129,8 @@ public class Shooter {
                 gateToggle = true;
             }
         }
+
+
 
         if(gamepad1.right_bumper && gamepad1.rightBumperWasPressed()) {
             boolean stateBeforeToggle = shootToggle;
@@ -144,12 +150,15 @@ public class Shooter {
         else {
             setShooterPower(0);
         }
+
         if(gateToggle) {
             gate.setPosition(gateOpen);
         }
         else {
             gate.setPosition(gateClosed);
         }
+
+
 
     }
     public void turretController(boolean isRed) {
@@ -158,10 +167,15 @@ public class Shooter {
         turret.setOffset();
     }
 
+    int presses = 0;
     public void gateController() {
-        if(gamepad1.bWasPressed()) {
+        if(gamepad1.bWasPressed() && gamepad1.b) {
             toggleGate();
+            presses += 1;
         }
+    }
+    public int getPresses() {
+        return presses;
     }
 
     public void setShooterStopped(boolean stop) {
@@ -174,7 +188,7 @@ public class Shooter {
     }
 
     public void hoodControl() {
-        final double lowestValue = 0.2;
+        final double lowestValue = 0.0;
         final double highestValue = 1.0;
         final double amountToMove = 0.05;
 
@@ -200,15 +214,13 @@ public class Shooter {
     }
 
     public void toggleGate() {
-        boolean hasToggled = false;
+        double initialState = gate.getPosition();
 
-        if(gate.getPosition() == gateOpen && hasToggled == false) {
-            gate.setPosition(gateClosed);
-            hasToggled = true;
-        }
-        if(gate.getPosition() == gateClosed && hasToggled == false) {
+        if(initialState == gateClosed) {
             gate.setPosition(gateOpen);
-            hasToggled = false;
+        }
+        if(initialState == gateOpen) {
+            gate.setPosition(gateClosed);
         }
         else {
             gate.setPosition(gateClosed);

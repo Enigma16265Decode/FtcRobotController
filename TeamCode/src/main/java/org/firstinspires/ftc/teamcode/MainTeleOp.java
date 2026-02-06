@@ -39,10 +39,10 @@ public class MainTeleOp extends OpMode {
 
     private Pose goalPose() {
         if(isRed) {
-            return new Pose(136.5, 142.5);
+            return new Pose(138, 142);
         }
         else {
-            return new Pose(136.5, 142.5-72);
+            return new Pose(144, 72);
         }
     }
 
@@ -78,6 +78,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("Turret Offset: ", turret.getOffset());
         telemetry.addData("Shooting Range: ", shooter.getShootingRangeString());
         telemetry.addData("Gate Pos", shooter.getGatePos());
+        telemetry.addData("presses: ", shooter.getPresses());
 
         telemetry.update();
     }
@@ -88,13 +89,12 @@ public class MainTeleOp extends OpMode {
     private void masterFunction() {
         drive.fieldCentricDrive();
         drive.poseController(isRed);
-        //shooter.hoodControl();
+        //shooter.gateController();
         shooter.toggleShootingRange();
-        shooter.gateController();
+        shooter.hoodControl();
         shooter.shooterController();
         shooter.turretController(isRed);
         intake.intakeController(); //make sure this goes after shooter controller
-        shooter.hoodControl();
 
         telemetry();
     }
