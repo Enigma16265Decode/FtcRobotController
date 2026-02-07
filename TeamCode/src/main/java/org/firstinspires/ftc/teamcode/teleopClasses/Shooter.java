@@ -31,7 +31,6 @@ public class Shooter {
     private boolean gateToggle = false;
     private boolean shooterStopped = false;
     private PIDController shooterController;
-
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
     private Servo hoodLeft;

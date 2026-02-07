@@ -13,43 +13,31 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class TurretPIDTuner extends OpMode {
     private TelemetryManager telemetryM;
     private DcMotorEx turret;
-    private double posOnInit;
-    public static double kP = 0.05, kI = 0.0, kD = 0.0015;
-    public static double c = 1;
+    private static double offset;
+    public static double kP = 0.0,  kI = 0.0, kD = 0.0; //0.002, 0.00007
+    public static double f = 0; //0.025
     PIDController turretController = new PIDController(kP, kI, kD);
     public static double targetPos = 100.0;
-    private static double ticksInDegree = 316.0 / 180.0;
+    private static double ticksInDegree = 4100.0 / 180.0;
 
-
-    public void moveTurret() {
-        double currentVelocity = turret.getVelocity();
-
-        turretController.setPID(kP, kI, kD);
-        double turretPid = turretController.calculate(currentVelocity, targetPos);
-
-        turret.setPower(turretPid);
-    }
-
-    public void setTarget(double toSet) {
-        double max = 10000.0;
-        double min = -10000.0;
-
-        if (toSet < min) {
-            toSet = min;
-        }
-        if (toSet > max) {
-            toSet = max;
-        }
-        targetPos = toSet;
-    }
 
     private void runPID() {
+        double currentPosition = turret.getCurrentPosition();
+
         turretController.setPID(kP, kI, kD);
-        double currentPos = turret.getCurrentPosition() - posOnInit;
-        double turretPid = turretController.calculate(currentPos, targetPos) * c;
+        double currentPos = currentPosition - offset;
+        double turretPid = turretController.calculate(currentPos, targetPos);
+        double ff;
+        if(targetPos > currentPosition) {
+            ff = Math.cos(Math.toRadians(targetPos / ticksInDegree)) * f;
+        }
+        else {
+            ff = Math.cos(Math.toRadians(targetPos / ticksInDegree)) * f * -1;
+        }
 
+        double power = turretPid + ff;
 
-        turret.setPower(turretPid);
+        turret.setPower(power);
     }
 
     @Override
@@ -59,7 +47,6 @@ public class TurretPIDTuner extends OpMode {
 
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         turret = hardwareMap.get(DcMotorEx.class, "turret");
-        posOnInit = turret.getCurrentPosition();
     }
     @Override
     public void start() {
@@ -71,14 +58,14 @@ public class TurretPIDTuner extends OpMode {
         runPID();
 
         telemetryM.debug("target", targetPos);
-        telemetryM.debug("current pos", turret.getCurrentPosition() - posOnInit);
+        telemetryM.debug("current pos true", turret.getCurrentPosition());
+        telemetryM.debug("current pos", turret.getCurrentPosition() - offset);
         telemetryM.debug("velocity", turret.getVelocity());
-        telemetryM.debug("claimed pos error", turretController.getPositionError());
 
         telemetryM.update();
 
         telemetry.addData("target", targetPos);
-        telemetry.addData("current pos", turret.getCurrentPosition() - posOnInit);
+        telemetry.addData("current pos", turret.getCurrentPosition());
         telemetry.addData("velocity", turret.getVelocity());
 
         telemetry.update();
