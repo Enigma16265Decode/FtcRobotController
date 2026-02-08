@@ -36,8 +36,7 @@ public class MainTeleOp extends OpMode {
     static TelemetryManager telemetryM;
 
     private final boolean isRed = true;
-
-    private Pose goalPose() {
+    public Pose goalPose() {
         if(isRed) {
             return new Pose(138, 142);
         }

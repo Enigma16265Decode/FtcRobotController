@@ -57,17 +57,11 @@ public class TurretPIDTuner extends OpMode {
     public void loop() {
         runPID();
 
-        telemetryM.debug("target", targetPos);
-        telemetryM.debug("current pos true", turret.getCurrentPosition());
-        telemetryM.debug("current pos", turret.getCurrentPosition() - offset);
-        telemetryM.debug("velocity", turret.getVelocity());
+        telemetryM.addData("target", targetPos);
+        telemetryM.addData("current pos true", turret.getCurrentPosition());
+        telemetryM.addData("current pos", turret.getCurrentPosition() - offset);
+        telemetryM.addData("velocity", turret.getVelocity());
 
         telemetryM.update();
-
-        telemetry.addData("target", targetPos);
-        telemetry.addData("current pos", turret.getCurrentPosition());
-        telemetry.addData("velocity", turret.getVelocity());
-
-        telemetry.update();
     }
 }

@@ -25,8 +25,8 @@ public class Shooter {
     private Turret turret;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1100;
-    public double gateClosed = 0.9;
-    public double gateOpen = 0.07;
+    public double gateClosed = 0.07;
+    public double gateOpen = 0.9;
     private boolean shootToggle = false;
     private boolean gateToggle = false;
     private boolean shooterStopped = false;
@@ -58,7 +58,7 @@ public class Shooter {
     }
 
     public boolean isShooterAtSpeed() {
-        if((getShooterVelocity() > 1150) && (getShooterVelocity() < 1220)) {
+        if((getShooterVelocity() > 1040) && (getShooterVelocity() < 1120)) {
             return true;
         }
         else {
@@ -210,6 +210,10 @@ public class Shooter {
                 setHoodPos(toSet);
             }
         }
+    }
+
+    public void setHoodForClose() {
+        hoodLeft.setPosition(closeHood);
     }
 
     public void toggleGate() {

@@ -23,27 +23,22 @@ enum ShootingStates {
     SHOOTING
 }
 
-@Autonomous(name = "Rudolph the auto (Red)", group = "Examples")
+@Autonomous(name = "Ronald the auto (Red)", group = "Examples")
 public class Dauto extends OpMode {
-
     Intake intake;
     Shooter shooter;
     Kinematics kinematics;
     Turret turret;
-
     ShootingStates currentShootingState = ShootingStates.IDLE;
-
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, shooterTimer;
-
-
     boolean isRed = true;
     private Pose goalPose() {
         if(isRed) {
-            return new Pose(134.5, 140);
+            return new Pose(138, 142);
         }
         else {
-            return new Pose(9.5, 140);
+            return new Pose(144, 72);
         }
     }
 
@@ -51,16 +46,16 @@ public class Dauto extends OpMode {
 
     private int pathState;
 
-    private final double intakeDriveSpeed = 0.85, normalDriveSpeed = 1;
+    private final double intakeDriveSpeed = 0.75, normalDriveSpeed = 1;
 
     private final Pose startPose = new Pose(119, 130, Math.toRadians(222)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(79.5, 92, Math.toRadians(222));
+    private final Pose scorePose = new Pose(89, 96, Math.toRadians(222));
     private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
     private final Pose stack1 = new Pose(125,85,toR(0));
     private final Pose beforePickupStack2 = new Pose(86, 62, toR(0)); //ee
-    private final Pose stack2 = new Pose(124,62,toR(0)); //ee
+    private final Pose stack2 = new Pose(127,59,toR(0)); //ee
     private final Pose beforePickupStack3 = new Pose(86, 37, toR(0));
-    private final Pose stack3 = new Pose(124,37,toR(0));
+    private final Pose stack3 = new Pose(127,37,toR(0));
     private final Pose parkPose = new Pose(105,72, toR(0));
 
 
@@ -167,6 +162,7 @@ public class Dauto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                shooter.setHoodForClose();
                 follower.followPath(scorePreload);
                 shooter.accelerateShooterPID();
                 setPathState(1);
@@ -175,7 +171,7 @@ public class Dauto extends OpMode {
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
-                        follower.followPath(moveToBeforeStack1);
+                        follower.followPath(moveToBeforeStack2);
                         setPathState(2);
                     }
                     break;
@@ -186,7 +182,7 @@ public class Dauto extends OpMode {
 
                     intake.setIntakePower(1);
                     follower.setMaxPower(intakeDriveSpeed);
-                    follower.followPath(pickupStack1);
+                    follower.followPath(pickupStack2);
                     setPathState(3);
                 }
                 break;
@@ -195,7 +191,7 @@ public class Dauto extends OpMode {
                     shooter.accelerateShooterPID();
 
                     follower.setMaxPower(normalDriveSpeed);
-                    follower.followPath(score2ndLoad);
+                    follower.followPath(score3rdLoad);
                     intake.setIntakePower(0);
                     setPathState(4);
                 }
@@ -204,7 +200,7 @@ public class Dauto extends OpMode {
                 if(!follower.isBusy()) {
                     shoot();
                     if(canProceed) {
-                        follower.followPath(moveToBeforeStack2);
+                        follower.followPath(moveToBeforeStack1);
                         setPathState(5);
                     }
                 }
@@ -215,7 +211,7 @@ public class Dauto extends OpMode {
 
                     intake.setIntakePower(1);
                     follower.setMaxPower(intakeDriveSpeed);
-                    follower.followPath(pickupStack2);
+                    follower.followPath(pickupStack1);
                     setPathState(6);
                 }
                 break;
@@ -224,7 +220,7 @@ public class Dauto extends OpMode {
                     shooter.accelerateShooterPID();
 
                     follower.setMaxPower(normalDriveSpeed);
-                    follower.followPath(score3rdLoad);
+                    follower.followPath(score2ndLoad);
                     intake.setIntakePower(0);
                     setPathState(7);
                 }
@@ -273,8 +269,8 @@ public class Dauto extends OpMode {
                 setPathState(-1);
         }
         shooter.accelerateShooterPID();
-        turret.moveTurret();
     }
+
 
 
     public void shoot() {
@@ -300,7 +296,7 @@ public class Dauto extends OpMode {
                 break;
             case 2:
                 intake.setIntakePower(1);
-                if (shootTimer.milliseconds() >= 2000) {
+                if (shootTimer.milliseconds() >= 1500) {
                     intake.setIntakePower(0);
                     shootTimer.reset();
                     // Shooting finished
@@ -416,6 +412,7 @@ public class Dauto extends OpMode {
         // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
         autonomousPathUpdate();
+        turret.moveTurret();
 
         // Feedback to Driver Hub for debugging
         telemetry.addData("path state", pathState);

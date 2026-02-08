@@ -36,6 +36,9 @@ public class Turret {
 
 
     public void moveTurret() {
+        if(homeOverride) {
+            targetPos = 0;
+        }
         /*
         turretController.setPID(kP, kI, kD);
         double currentPos = turret.getCurrentPosition() - offset;
