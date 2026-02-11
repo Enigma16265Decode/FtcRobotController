@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.IndicatorColors;
 
 
 enum ShootingRanges {
@@ -23,6 +24,7 @@ public class Shooter {
     private final Gamepad gamepad1;
     private final HardwareMap hardwareMap;
     private Turret turret;
+    private Kinematics kinematics;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1100;
     public double gateClosed = 0.07;
@@ -35,19 +37,20 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hoodLeft;
     private Servo gate;
+    private Servo indicator;
+    private IndicatorColors indicatorColor = IndicatorColors.RED;
+    private double rgb;
 
-    private void edada() {
 
-    }
-
-
-    public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret) {
+    public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Kinematics kinematics) {
         shooterController = new PIDController(sP, sI, sD);
 
+        indicator = hardwareMap.get(Servo.class, "indicator");
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
         secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
         hoodLeft = hardwareMap.get(Servo.class, "leftHood");
         gate = hardwareMap.get(Servo.class, "gate");
+
 
         secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
         hoodLeft.setDirection(Servo.Direction.REVERSE);
@@ -55,6 +58,7 @@ public class Shooter {
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
         this.turret = turret;
+        this.kinematics = kinematics;
     }
 
     public boolean isShooterAtSpeed() {
@@ -65,6 +69,44 @@ public class Shooter {
             return false;
         }
     }
+
+    public void runRgb(IndicatorColors color) {
+        indicatorColor = color;
+        if(indicatorColor == null) {
+            indicator.setPosition(0);
+        }
+        if(indicatorColor == IndicatorColors.GREEN) {
+            indicator.setPosition(0.485);
+        }
+        if(indicatorColor == IndicatorColors.RED) {
+            indicator.setPosition(0.277);
+        }
+        if(indicatorColor == IndicatorColors.RAINBOW) {
+            if(rgb >= 0.722) {
+                rgb = 0.277;
+            }
+            else {
+                rgb += 0.001;
+            }
+            indicator.setPosition(rgb);
+        }
+    }
+
+    public void setRgbBasedOnDistance() {
+        double ideal = 67;
+        double off = 6;
+        double max = ideal + off;
+        double min = ideal - off;
+        double distance = kinematics.getDistanceToGoal();
+        if(distance < max && distance > min) {
+            runRgb(IndicatorColors.GREEN);
+        }
+        else {
+            runRgb(IndicatorColors.RED);
+        }
+    }
+
+
 
     public void setShooterPower(double value) {
         primaryShooter.setPower(value);

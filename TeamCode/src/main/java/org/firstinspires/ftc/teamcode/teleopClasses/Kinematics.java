@@ -58,8 +58,15 @@ public class Kinematics { //this does a lot of the calculations/logic
         }
 
         return unwrappedDegrees;
+    }
 
+    public double getDistanceToGoal() {
+        double x1 = follower.getPose().getX();
+        double y1 = follower.getPose().getY();
+        double x2 = goalPose.getX();
+        double y2 = goalPose.getY();
 
-
+        double distance = Math.hypot(x1-x2, y1-y2);
+        return distance;
     }
 }

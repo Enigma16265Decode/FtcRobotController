@@ -41,7 +41,7 @@ public class MainTeleOp extends OpMode {
             return new Pose(138, 142);
         }
         else {
-            return new Pose(144, 72);
+            return new Pose(144, 2);
         }
     }
 
@@ -93,6 +93,8 @@ public class MainTeleOp extends OpMode {
         shooter.hoodControl();
         shooter.shooterController();
         shooter.turretController(isRed);
+        //shooter.runRgb();
+        shooter.setRgbBasedOnDistance();
         intake.intakeController(); //make sure this goes after shooter controller
 
         telemetry();
@@ -123,7 +125,7 @@ public class MainTeleOp extends OpMode {
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower); //1
         kinematics = new Kinematics(follower, goalPose()); //2
         turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, false); //3
-        shooter = new Shooter(hardwareMap, gamepad1, turret); //4
+        shooter = new Shooter(hardwareMap, gamepad1, turret, kinematics); //4
         intake = new Intake(hardwareMap, gamepad1, shooter); //5
     }
 }

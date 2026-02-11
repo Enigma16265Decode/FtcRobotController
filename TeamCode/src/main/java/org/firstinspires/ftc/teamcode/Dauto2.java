@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -32,7 +33,7 @@ public class Dauto2 extends OpMode {
             return new Pose(138, 142);
         }
         else {
-            return new Pose(144, 72);
+            return new Pose(144, 2);
         }
     }
 
@@ -48,13 +49,14 @@ public class Dauto2 extends OpMode {
     private final Pose stack1 = new Pose(144-125,85,toR(180));
     private final Pose beforePickupStack2 = new Pose(144-86, 62, toR(180)); //ee
     private final Pose stack2 = new Pose(144-127,59,toR(180)); //ee
+    private final Pose shoot3rdControl = new Pose(90,64);
     private final Pose beforePickupStack3 = new Pose(144-86, 37, toR(180));
     private final Pose stack3 = new Pose(144-127,37,toR(180));
     private final Pose parkPose = new Pose(144-105,72, toR(180));
 
 
     ElapsedTime shootTimer = new ElapsedTime();
-    int shootStage = 0;
+    private int shootStage = 0;
 
     private Path scorePreload;
     private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, moveToBeforeStack3, pickupStack3, score4thLoad, park;
@@ -108,12 +110,22 @@ public class Dauto2 extends OpMode {
                 .setLinearHeadingInterpolation(beforePickupStack2.getHeading(), stack2.getHeading())
                 .build();
 
+        /*
         score3rdLoad = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(stack2, scorePose)
                 )
                 .setLinearHeadingInterpolation(stack2.getHeading(), scorePose.getHeading())
+                .build();
+
+         */
+
+        score3rdLoad = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierCurve(stack2, shoot3rdControl, scorePose)
+                ).setLinearHeadingInterpolation(stack2.getHeading(), scorePose.getHeading())
                 .build();
 
         moveToBeforeStack3 = follower
@@ -424,7 +436,7 @@ public class Dauto2 extends OpMode {
     public void init() {
         kinematics = new Kinematics(follower, goalPose()); //2
         turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true); //3
-        shooter = new Shooter(hardwareMap, gamepad1, turret); //4
+        shooter = new Shooter(hardwareMap, gamepad1, turret, kinematics); //4
         intake = new Intake(hardwareMap, gamepad1, shooter); //5
 
         pathTimer = new Timer();
