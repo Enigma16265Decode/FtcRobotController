@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
 import java.util.function.Supplier;
 
-@Configurable
-@TeleOp(name = "! SC TeleOP \uD83D\uDFE5")
+//@Configurable
+//@TeleOp(name = "! SC TeleOP \uD83D\uDFE5")
 public class MainTeleOp extends OpMode {
     Intake intake;
     Shooter shooter;
@@ -35,13 +35,22 @@ public class MainTeleOp extends OpMode {
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
 
-    private final boolean isRed = true;
+    private boolean isRed;
     public Pose goalPose() {
         if(isRed) {
-            return new Pose(138, 142);
+            return new Pose(135, 141);
         }
         else {
-            return new Pose(144, 2);
+            return new Pose(135, 3);
+        }
+    }
+
+    public MainTeleOp(Alliances alliance) {
+        if(alliance == Alliances.RED) {
+            isRed = true;
+        }
+        else {
+            isRed = false;
         }
     }
 
