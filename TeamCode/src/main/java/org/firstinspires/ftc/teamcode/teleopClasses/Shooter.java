@@ -18,7 +18,7 @@ enum ShootingRanges {
     FAR
 }
 public class Shooter {
-    private int closeSpeed = 1100, farSpeed = 1460;
+    private int closeSpeed = 1100, farSpeed = 1350;
     private double closeHood = 0.85, farHood = 0.4;
     ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1;
@@ -73,17 +73,17 @@ public class Shooter {
     public void runRgb(IndicatorColors color) {
         indicatorColor = color;
         if(indicatorColor == null) {
-            indicator.setPosition(0.277);
+            indicator.setPosition(0.28);
         }
         if(indicatorColor == IndicatorColors.GREEN) {
             indicator.setPosition(0.485);
         }
         if(indicatorColor == IndicatorColors.RED) {
-            indicator.setPosition(0.277);
+            indicator.setPosition(0.28);
         }
         if(indicatorColor == IndicatorColors.RAINBOW) {
             if(rgb >= 0.722) {
-                rgb = 0.277;
+                rgb = 0.28;
             }
             else {
                 rgb += 0.001;
@@ -93,7 +93,7 @@ public class Shooter {
     }
 
     public void setRgbBasedOnDistance() {
-        double ideal = 67;
+        double ideal = 64; // was 67
         double off = 6;
         double max = ideal + off;
         double min = ideal - off;
