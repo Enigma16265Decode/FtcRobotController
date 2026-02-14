@@ -28,7 +28,7 @@ public class Intake { //This also does transfer
         }
         else {
             if(gamepad1.left_trigger > 0.4) {
-                intake.setPower(-1);
+                intake.setPower(-0.7);
             }
             else {
                 intake.setPower(0);

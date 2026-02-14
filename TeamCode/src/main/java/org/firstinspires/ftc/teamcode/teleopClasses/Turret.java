@@ -19,7 +19,7 @@ public class Turret {
     private double targetPos = 0.0;
     private boolean homeOverride = false;
     private double offset = 0;
-    private final double toOffset = 5;
+    private final double toOffset = 25;
     private static double ticksInDegree = 4100.0 / 180.0;
     private final double max = 2100, min = -2100;
     public Turret(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Kinematics kinematics, boolean homeOverride) {
@@ -75,7 +75,7 @@ public class Turret {
         if(gamepad1.dpadUpWasPressed() || gamepad2.dpadLeftWasPressed()) {
             offset -= toOffset;
         }
-        if(gamepad1.dpadUpWasPressed() || gamepad2.dpadRightWasPressed()) {
+        if(gamepad1.dpadDownWasPressed() || gamepad2.dpadRightWasPressed()) {
             offset += toOffset;
         }
     }

@@ -73,7 +73,7 @@ public class Shooter {
     public void runRgb(IndicatorColors color) {
         indicatorColor = color;
         if(indicatorColor == null) {
-            indicator.setPosition(0);
+            indicator.setPosition(0.277);
         }
         if(indicatorColor == IndicatorColors.GREEN) {
             indicator.setPosition(0.485);
