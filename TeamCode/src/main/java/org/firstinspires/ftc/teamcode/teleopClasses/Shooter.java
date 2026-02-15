@@ -12,6 +12,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.IndicatorColors;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 enum ShootingRanges {
     CLOSE,
@@ -40,7 +43,9 @@ public class Shooter {
     private Servo indicator;
     private IndicatorColors indicatorColor = IndicatorColors.RED;
     private double rgb;
-
+    private int[] closeVelocities = {1100, 1190, 1270, 1190};
+    private double[] closeDistances = {64, 76, 88};
+    Map<Integer, Double> distanceFromVelocity = new HashMap<>();
 
     public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Kinematics kinematics) {
         shooterController = new PIDController(sP, sI, sD);
@@ -55,13 +60,22 @@ public class Shooter {
         secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
         hoodLeft.setDirection(Servo.Direction.REVERSE);
 
+        initializeMaps();
+
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
         this.turret = turret;
         this.kinematics = kinematics;
     }
 
+    private void initializeMaps() {
+        distanceFromVelocity.put(closeVelocities[0], closeDistances[0]);
+        distanceFromVelocity.put(closeVelocities[1], closeDistances[1]);
+        distanceFromVelocity.put(closeVelocities[2], closeDistances[2]);
+    }
+
     public boolean isShooterAtSpeed() {
+        //used by auto so fine to be hard coded
         if((getShooterVelocity() > 1040) && (getShooterVelocity() < 1120)) {
             return true;
         }
@@ -70,39 +84,16 @@ public class Shooter {
         }
     }
 
-    public void runRgb(IndicatorColors color) {
-        indicatorColor = color;
-        if(indicatorColor == null) {
-            indicator.setPosition(0.28);
-        }
-        if(indicatorColor == IndicatorColors.GREEN) {
-            indicator.setPosition(0.485);
-        }
-        if(indicatorColor == IndicatorColors.RED) {
-            indicator.setPosition(0.28);
-        }
-        if(indicatorColor == IndicatorColors.RAINBOW) {
-            if(rgb >= 0.722) {
-                rgb = 0.28;
-            }
-            else {
-                rgb += 0.001;
-            }
-            indicator.setPosition(rgb);
-        }
-    }
 
-    public void setRgbBasedOnDistance() {
-        double ideal = 64; // was 67
-        double off = 6;
+    public boolean betweenMinMaxWithTolerance(double x, double ideal, double off) {
         double max = ideal + off;
         double min = ideal - off;
-        double distance = kinematics.getDistanceToGoal();
-        if(distance < max && distance > min) {
-            runRgb(IndicatorColors.GREEN);
+
+        if(x < max && x > min) {
+            return true;
         }
         else {
-            runRgb(IndicatorColors.RED);
+            return false;
         }
     }
 
@@ -145,6 +136,41 @@ public class Shooter {
         setHoodPos(0.9);
     }
 
+    public void setRgbBasedOnDistance() {
+        if(getDistanceIndex() == 0) {
+            indicator.setPosition(0.46);
+        }
+        if(getDistanceIndex() == 1) {
+            indicator.setPosition(0.57);
+        }
+        if(getDistanceIndex() == 2) {
+            indicator.setPosition(0.69);
+        }
+        if(getDistanceIndex() == 3) {
+            indicator.setPosition(0.282);
+        }
+    }
+
+    private int getDistanceIndex() {
+        //double ideal = 64; // was 67
+        double off = 6;
+        double distance = kinematics.getDistanceToGoal();
+        if(betweenMinMaxWithTolerance(distance, closeDistances[0], off)) {
+            return 0;
+        }
+        if(betweenMinMaxWithTolerance(distance, closeDistances[1], off)) {
+            return 1;
+        }
+        if(betweenMinMaxWithTolerance(distance, closeDistances[2], off)) {
+            return 2;
+        }
+        return 3;
+    }
+
+    private int targetSpeedBasedOnDistance() {
+        return closeVelocities[getDistanceIndex()];
+    }
+
     public void accelerateShooterPID() {
         if (!shooterStopped) {
             double currentVelocity = primaryShooter.getVelocity() * -1;
@@ -159,6 +185,7 @@ public class Shooter {
 
     public void shooterController() {
         double currentVelocity = primaryShooter.getVelocity() * -1;
+        targetSpeed = targetSpeedBasedOnDistance();
 
 
         if(gamepad1.b && gamepad1.bWasPressed()) {

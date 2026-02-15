@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
 
-@Autonomous(name = "Beuford the auto (Blue)", group = "Examples")
+@Autonomous(name = "Billy the auto (Blue)")
 public class Dauto2 extends OpMode {
     Intake intake;
     Shooter shooter;
@@ -33,7 +33,7 @@ public class Dauto2 extends OpMode {
             return new Pose(138, 142);
         }
         else {
-            return new Pose(144, 2);
+            return new Pose(144, 72);
         }
     }
 
@@ -41,22 +41,23 @@ public class Dauto2 extends OpMode {
 
     private int pathState;
 
-    private final double intakeDriveSpeed = 0.75, normalDriveSpeed = 1;
+    private final double intakeDriveSpeed = 0.95, normalDriveSpeed = 1;
 
     private final Pose startPose = new Pose(144-119, 130, Math.toRadians(315)); // Start Pose of our robot.
     private final Pose scorePose = new Pose(144-89, 96, Math.toRadians(315));
     private final Pose beforePickupStack1 = new Pose(144-81, 85, toR(180));
     private final Pose stack1 = new Pose(144-125,85,toR(180));
-    private final Pose beforePickupStack2 = new Pose(144-86, 62, toR(180)); //ee
-    private final Pose stack2 = new Pose(144-127,59,toR(180)); //ee
-    private final Pose shoot3rdControl = new Pose(90,64);
+    private final Pose beforePickupStack2 = new Pose(144-94, 62, toR(180)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
+    private final Pose pickupStack2Control = new Pose(144-123, 58);
+    private final Pose stack2 = new Pose(144-127,65,toR(180)); //59
+    private final Pose shoot3rdControl = new Pose(144-90,64);
     private final Pose beforePickupStack3 = new Pose(144-86, 37, toR(180));
-    private final Pose stack3 = new Pose(144-127,37,toR(180));
-    private final Pose parkPose = new Pose(144-105,72, toR(180));
+    private final Pose stack3 = new Pose(142-127,37,toR(180));
+    private final Pose parkPose = new Pose(142-105,72, toR(180));
 
 
     ElapsedTime shootTimer = new ElapsedTime();
-    private int shootStage = 0;
+    int shootStage = 0;
 
     private Path scorePreload;
     private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, moveToBeforeStack3, pickupStack3, score4thLoad, park;
@@ -101,7 +102,15 @@ public class Dauto2 extends OpMode {
                 )
                 .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack2.getHeading())
                 .build();
+        pickupStack2 = follower
+                .pathBuilder()
+                .addPath(
+                        new BezierCurve(beforePickupStack2, pickupStack2Control, stack2)
+                )
+                .build();
 
+
+        /*
         pickupStack2 = follower
                 .pathBuilder()
                 .addPath(
@@ -110,7 +119,7 @@ public class Dauto2 extends OpMode {
                 .setLinearHeadingInterpolation(beforePickupStack2.getHeading(), stack2.getHeading())
                 .build();
 
-        /*
+
         score3rdLoad = follower
                 .pathBuilder()
                 .addPath(
@@ -185,6 +194,7 @@ public class Dauto2 extends OpMode {
             case 2:
                 if(!follower.isBusy() /*follower.atPose(beforePickupStack1, 8, 3, toR(20))*/) {
                     shooter.accelerateShooterPID();
+                    follower.setMaxPower(intakeDriveSpeed);
 
                     intake.setIntakePower(1);
                     follower.setMaxPower(intakeDriveSpeed);
@@ -194,6 +204,7 @@ public class Dauto2 extends OpMode {
                 break;
             case 3:
                 if(!follower.isBusy()) {
+                    follower.setMaxPower(1);
                     shooter.accelerateShooterPID();
 
                     follower.setMaxPower(normalDriveSpeed);

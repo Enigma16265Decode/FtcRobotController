@@ -19,13 +19,13 @@ public class Turret {
     private double targetPos = 0.0;
     private boolean homeOverride = false;
     private double offset = 0;
-    private final double toOffset = 25;
+    private final double toOffset = 50;
     private static double ticksInDegree = 4100.0 / 180.0;
-    private final double max = 2100, min = -2100;
+    private double max = 2100, min = -2100;
     public Turret(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Kinematics kinematics, boolean homeOverride) {
         turret = hardwareMap.get(DcMotorEx.class, "turret");
         turret.setDirection(DcMotorSimple.Direction.REVERSE);
-        turretController.setTolerance(0.5);
+        //turretController.setTolerance(0.5);
 
         this.gamepad1 = gamepad1;
         this.gamepad2 = gamepad2;
@@ -52,7 +52,7 @@ public class Turret {
         double currentPosition = turret.getCurrentPosition();
 
         turretController.setPID(kP, kI, kD);
-        double currentPos = currentPosition - offset;
+        double currentPos = currentPosition + offset;
         double turretPid = turretController.calculate(currentPos, targetPos);
         double ff;
         if(targetPos > currentPosition) {
@@ -74,9 +74,13 @@ public class Turret {
     public void setOffset() {
         if(gamepad1.dpadUpWasPressed() || gamepad2.dpadLeftWasPressed()) {
             offset -= toOffset;
+            min -= toOffset;
+            max -= toOffset;
         }
         if(gamepad1.dpadDownWasPressed() || gamepad2.dpadRightWasPressed()) {
             offset += toOffset;
+            min += toOffset;
+            max += toOffset;
         }
     }
 
