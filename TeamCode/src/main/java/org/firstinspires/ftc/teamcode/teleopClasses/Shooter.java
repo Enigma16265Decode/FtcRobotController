@@ -43,7 +43,7 @@ public class Shooter {
     private Servo indicator;
     private IndicatorColors indicatorColor = IndicatorColors.RED;
     private double rgb;
-    private int[] closeVelocities = {1100, 1190, 1270, 1190};
+    private int[] closeVelocities = {1100, 1160, 1270, 1160};
     private double[] closeDistances = {64, 76, 88};
     Map<Integer, Double> distanceFromVelocity = new HashMap<>();
 

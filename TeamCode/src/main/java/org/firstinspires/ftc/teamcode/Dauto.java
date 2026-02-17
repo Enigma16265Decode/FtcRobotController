@@ -24,7 +24,7 @@ enum ShootingStates {
     SHOOTING
 }
 
-@Autonomous(name = "Ronald the auto (Red)")
+@Autonomous(name = "Ronald the auto (Red)", group = "Examples")
 public class Dauto extends OpMode {
     Intake intake;
     Shooter shooter;
