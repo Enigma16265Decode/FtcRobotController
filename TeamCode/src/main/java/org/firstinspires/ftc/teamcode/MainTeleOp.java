@@ -76,17 +76,13 @@ public class MainTeleOp extends OpMode {
         double dy = goalPose().getY() - follower.getPose().getY();
         double goalHeadingRadians = Math.atan2(dy, dx);
 
-        //telemetry.addData("target :", shooter.targetSpeed);
         telemetry.addData("Hood Pos: ", shooter.getHoodPos());
         telemetry.addData("Shooter Power : ", shooter.getShooterPower());
-        telemetry.addData("(1200) shooter vel: ", shooter.getShooterVelocity());
-        //telemetry.addData("intake power: ", intake.getIntakePower());
-        //telemetry.addData("goal heading: ", kinematics.getHeadingToGoal(isRed));
-        //telemetry.addData("robot/goal heading", goalHeadingRadians);
+        telemetry.addData("Shooter vel: ", shooter.getShooterVelocity());
         telemetry.addData("Turret Offset: ", turret.getOffset());
         telemetry.addData("Shooting Range: ", shooter.getShootingRangeString());
         telemetry.addData("Gate Pos", shooter.getGatePos());
-        telemetry.addData("presses: ", shooter.getPresses());
+        //telemetry.addData("presses: ", shooter.getPresses());
 
         telemetry.update();
     }
@@ -94,26 +90,22 @@ public class MainTeleOp extends OpMode {
 
 
 
-    private void masterFunction() {
+    private void runTeleOp() {
         drive.fieldCentricDrive();
         drive.poseController(isRed);
-        //shooter.gateController();
         shooter.toggleShootingRange();
         shooter.hoodControl();
         shooter.shooterController();
         shooter.turretController(isRed);
-        //shooter.runRgb();
         shooter.setRgbBasedOnDistance();
-        intake.intakeController(); //make sure this goes after shooter controller
+        intake.intakeController();
 
         telemetry();
     }
 
-
-    //important im now gonna use opmode instead of linearopmode because i like it more
-
     @Override
     public void init_loop() {
+        telemetry.addData("Current Turret Pos:",turret.getAbsoluteCurrentPos());
     }
 
     @Override
@@ -124,7 +116,7 @@ public class MainTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        masterFunction();
+        runTeleOp();
     }
 
     @Override

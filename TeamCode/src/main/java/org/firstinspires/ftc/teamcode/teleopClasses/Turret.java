@@ -34,20 +34,11 @@ public class Turret {
         this.homeOverride = homeOverride;
     }
 
-
+    /** Moves the turret according to PID and target pos**/
     public void moveTurret() {
         if(homeOverride) {
             targetPos = 0;
         }
-        /*
-        turretController.setPID(kP, kI, kD);
-        double currentPos = turret.getCurrentPosition() - offset;
-        double turretPid = turretController.calculate(currentPos, targetPos);
-
-
-        turret.setPower(turretPid);
-
-         */
 
         double currentPosition = turret.getCurrentPosition();
 
@@ -71,6 +62,11 @@ public class Turret {
         return offset;
     }
 
+    public double getAbsoluteCurrentPos() {
+        return turret.getCurrentPosition();
+    }
+
+    /** changes the turret offset on button press **/
     public void setOffset() {
         if(gamepad1.dpadUpWasPressed() || gamepad2.dpadLeftWasPressed()) {
             offset -= toOffset;
@@ -85,6 +81,7 @@ public class Turret {
     }
 
 
+    /** Sets the turret's target based on robot position relative to goal **/
     public void setTargetBasedOnHeadingToGoal(boolean isRed) {
         if(!homeOverride) {
             double toSet = (kinematics.getHeadingToGoal(isRed) * ticksInDegree) - offset;

@@ -233,13 +233,12 @@ public class BasicTeleOp extends OpMode {
     void toggleGate() {
         boolean hasToggled = false;
 
-        if(gate.getPosition() == gateOpen && hasToggled == false) {
+        if(gate.getPosition() == gateOpen) {
             gate.setPosition(gateClosed);
             hasToggled = true;
         }
         if(gate.getPosition() == gateClosed && hasToggled == false) {
             gate.setPosition(gateOpen);
-            hasToggled = false;
         }
         else {
             gate.setPosition(gateClosed);
@@ -277,10 +276,6 @@ public class BasicTeleOp extends OpMode {
     private void fieldCentricDrive() {
         boolean automatedDrive = false;
         double slowmodeMultiplier = 0.3;
-
-        if(!follower.isBusy()) {
-            automatedDrive = false;
-        }
 
         //Call this once per loop
         follower.update();

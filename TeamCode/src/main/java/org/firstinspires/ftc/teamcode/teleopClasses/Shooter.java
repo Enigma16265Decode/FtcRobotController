@@ -41,10 +41,9 @@ public class Shooter {
     private Servo hoodLeft;
     private Servo gate;
     private Servo indicator;
-    private IndicatorColors indicatorColor = IndicatorColors.RED;
-    private double rgb;
     private int[] closeVelocities = {1100, 1160, 1270, 1160};
     private double[] closeDistances = {64, 76, 88};
+    Map<IndicatorColors, Double> indicatorColorsDouble = new HashMap<>();
     Map<Integer, Double> distanceFromVelocity = new HashMap<>();
 
     public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Kinematics kinematics) {
@@ -68,14 +67,20 @@ public class Shooter {
         this.kinematics = kinematics;
     }
 
+    /** Adds values into maps **/
     private void initializeMaps() {
         distanceFromVelocity.put(closeVelocities[0], closeDistances[0]);
         distanceFromVelocity.put(closeVelocities[1], closeDistances[1]);
         distanceFromVelocity.put(closeVelocities[2], closeDistances[2]);
+
+        indicatorColorsDouble.put(IndicatorColors.RED, 0.282);
+        indicatorColorsDouble.put(IndicatorColors.GREEN, 0.46);
+        indicatorColorsDouble.put(IndicatorColors.BLUE, 0.61);
+        indicatorColorsDouble.put(IndicatorColors.PURPLE, 0.7);
     }
 
     public boolean isShooterAtSpeed() {
-        //used by auto so fine to be hard coded
+        //used by auto so should fine to be hard coded, also writing this comment where spur the moment, time is of the essence
         if((getShooterVelocity() > 1040) && (getShooterVelocity() < 1120)) {
             return true;
         }
@@ -85,6 +90,7 @@ public class Shooter {
     }
 
 
+    /** Checks if x is off by less than y amount in either direction (positive or negative) **/
     public boolean betweenMinMaxWithTolerance(double x, double ideal, double off) {
         double max = ideal + off;
         double min = ideal - off;
@@ -104,6 +110,7 @@ public class Shooter {
         secondaryShooter.setPower(value);
     }
 
+    /** Toggles shootingRange between ShootingRanges.CLOSE and ShootingRanges.FAR based on gamepad input **/
     public void toggleShootingRange() {
         ShootingRanges initialState = shootingRange;
         if (gamepad1.xWasPressed()) {
@@ -133,24 +140,26 @@ public class Shooter {
     }
 
     public void initHood() {
-        setHoodPos(0.9);
+        setHoodPos(gateClosed);
     }
 
+    /** Sets the indicator light's color based on getDistanceIndex() **/
     public void setRgbBasedOnDistance() {
         if(getDistanceIndex() == 0) {
-            indicator.setPosition(0.46);
+            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.GREEN));
         }
         if(getDistanceIndex() == 1) {
-            indicator.setPosition(0.57);
+            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.BLUE));
         }
         if(getDistanceIndex() == 2) {
-            indicator.setPosition(0.69);
+            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.PURPLE));
         }
         if(getDistanceIndex() == 3) {
-            indicator.setPosition(0.282);
+            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.RED));
         }
     }
 
+    /** Returns an int based on robot's distance to the goal**/
     private int getDistanceIndex() {
         //double ideal = 64; // was 67
         double off = 6;

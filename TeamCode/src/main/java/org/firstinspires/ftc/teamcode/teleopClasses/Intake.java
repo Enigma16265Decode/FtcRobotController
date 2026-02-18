@@ -22,13 +22,14 @@ public class Intake { //This also does transfer
         intake.setPower(toSet);
     }
 
+    /** Runs the intake based on gamepad input **/
     public void intakeController() {
         if(gamepad1.right_trigger > 0.4) {
             intake.setPower(1);
         }
         else {
             if(gamepad1.left_trigger > 0.4) {
-                intake.setPower(-0.7);
+                intake.setPower(-1);
             }
             else {
                 intake.setPower(0);
@@ -39,15 +40,5 @@ public class Intake { //This also does transfer
                 intake.setPower(1);
             }
         }
-        /*
-        if(!gamepad1.a && gamepad1.right_trigger > 0.4) {
-            setShooterPower(-0.4);
-        }
-
-         */
-    }
-
-    public double getIntakePower() {
-        return intake.getPower();
     }
 }

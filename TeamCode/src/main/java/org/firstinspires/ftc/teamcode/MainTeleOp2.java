@@ -9,6 +9,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
 import java.util.function.Supplier;
 
+@Disabled //old crusty that doesnt use the super(alliance) system
 @Configurable
 @TeleOp(name = "! SC TeleOP \uD83D\uDFE6")
 public class MainTeleOp2 extends OpMode {
