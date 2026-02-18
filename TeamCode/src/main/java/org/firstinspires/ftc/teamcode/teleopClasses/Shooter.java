@@ -41,7 +41,7 @@ public class Shooter {
     private Servo hoodLeft;
     private Servo gate;
     private Servo indicator;
-    private int[] closeVelocities = {1100, 1160, 1270, 1160};
+    private int[] closeVelocities = {1100, 1170, 1270, 1170};
     private double[] closeDistances = {64, 76, 88};
     Map<IndicatorColors, Double> indicatorColorsDouble = new HashMap<>();
     Map<Integer, Double> distanceFromVelocity = new HashMap<>();
@@ -81,7 +81,7 @@ public class Shooter {
 
     public boolean isShooterAtSpeed() {
         //used by auto so should fine to be hard coded, also writing this comment where spur the moment, time is of the essence
-        if((getShooterVelocity() > 1040) && (getShooterVelocity() < 1120)) {
+        if((getShooterVelocity() > 1030) && (getShooterVelocity() < 1120)) {
             return true;
         }
         else {
@@ -140,7 +140,7 @@ public class Shooter {
     }
 
     public void initHood() {
-        setHoodPos(gateClosed);
+        setHoodPos(closeHood);
     }
 
     /** Sets the indicator light's color based on getDistanceIndex() **/

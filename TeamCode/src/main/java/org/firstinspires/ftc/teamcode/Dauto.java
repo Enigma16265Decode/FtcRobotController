@@ -44,18 +44,18 @@ public class Dauto extends OpMode {
     }
 
     private boolean canProceed;
-
     private int pathState;
+    int holdStage = 0;
 
-    private final double intakeDriveSpeed = 0.75, normalDriveSpeed = 1;
+    private final double intakeDriveSpeed = 0.8, normalDriveSpeed = 1;
 
     private final Pose startPose = new Pose(119, 130, Math.toRadians(222)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(89, 96, Math.toRadians(222));
+    private final Pose scorePose = new Pose(91, 98, Math.toRadians(222));
     private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
     private final Pose stack1 = new Pose(125,85,toR(0));
     private final Pose beforePickupStack2 = new Pose(94, 62, toR(0)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
     private final Pose pickupStack2Control = new Pose(123, 58);
-    private final Pose stack2 = new Pose(127,65,toR(0)); //59
+    private final Pose stack2 = new Pose(126,63,toR(0)); //59
     private final Pose shoot3rdControl = new Pose(90,64);
     private final Pose beforePickupStack3 = new Pose(86, 37, toR(0));
     private final Pose stack3 = new Pose(127,37,toR(0));
@@ -63,6 +63,7 @@ public class Dauto extends OpMode {
 
 
     ElapsedTime shootTimer = new ElapsedTime();
+    ElapsedTime holdTimer = new ElapsedTime();
     int shootStage = 0;
 
     private Path scorePreload;
@@ -203,7 +204,7 @@ public class Dauto extends OpMode {
                     follower.setMaxPower(intakeDriveSpeed);
 
                     intake.setIntakePower(1);
-                    follower.setMaxPower(intakeDriveSpeed);
+                    follower.setMaxPower(intakeDriveSpeed-0.2);
                     follower.followPath(pickupStack2);
                     setPathState(3);
                 }
@@ -221,6 +222,8 @@ public class Dauto extends OpMode {
                 break;
             case 4:
                 if(!follower.isBusy()) {
+                    intake.setIntakePower(0);
+
                     shoot();
                     if(canProceed) {
                         follower.followPath(moveToBeforeStack1);
@@ -295,6 +298,20 @@ public class Dauto extends OpMode {
     }
 
 
+    private void holdIntake() {
+        if(holdStage == 0) {
+            holdTimer.reset();
+            holdStage = 1;
+        }
+
+        switch (holdStage) {
+            case 1:
+                if(holdTimer.milliseconds() > 200) {
+                    //TODO COMPLETE THIS!
+                }
+        }
+
+    }
 
     public void shoot() {
         canProceed = false;
