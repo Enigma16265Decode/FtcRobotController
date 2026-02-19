@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
 
-import static java.lang.Thread.sleep;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -19,15 +17,9 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
 import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
-enum ShootingStates {
-    IDLE,
-    ACCELERATING,
-    AT_SPEED,
-    SHOOTING
-}
 
-@Autonomous(name = "Ronald the auto (Red)", group = "Examples")
-public class Dauto extends OpMode {
+@Autonomous(name = "Beuford the auto (Blue)", group = "Examples")
+public class Dauto2 extends OpMode {
     Intake intake;
     Shooter shooter;
     Kinematics kinematics;
@@ -51,17 +43,17 @@ public class Dauto extends OpMode {
 
     private final double intakeDriveSpeed = 0.8, normalDriveSpeed = 1;
 
-    private final Pose startPose = new Pose(119, 130, Math.toRadians(222)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(91, 98, Math.toRadians(222));
-    private final Pose beforePickupStack1 = new Pose(81, 85, toR(0));
-    private final Pose stack1 = new Pose(124,85,toR(0));
-    private final Pose beforePickupStack2 = new Pose(94, 62, toR(0)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
-    private final Pose pickupStack2Control = new Pose(123, 58);
-    private final Pose stack2 = new Pose(127,63,toR(0)); //59
-    private final Pose shoot3rdControl = new Pose(90,64);
-    private final Pose beforePickupStack3 = new Pose(86, 37, toR(0));
-    private final Pose stack3 = new Pose(127,37,toR(0));
-    private final Pose parkPose = new Pose(105,72, toR(0));
+    private final Pose startPose = new Pose(144-119, 130, Math.toRadians(315)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(144-91, 98, Math.toRadians(315));
+    private final Pose beforePickupStack1 = new Pose(144-81, 85, toR(180));
+    private final Pose stack1 = new Pose(144-124,85,toR(180));
+    private final Pose beforePickupStack2 = new Pose(144-94, 62, toR(180)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
+    private final Pose pickupStack2Control = new Pose(144-123, 58);
+    private final Pose stack2 = new Pose(144-127,63,toR(180)); //59
+    private final Pose shoot3rdControl = new Pose(144-90,64);
+    private final Pose beforePickupStack3 = new Pose(144-86, 37, toR(180));
+    private final Pose stack3 = new Pose(144-127,37,toR(180));
+    private final Pose parkPose = new Pose(144-105,72, toR(180));
 
 
     ElapsedTime shootTimer = new ElapsedTime();
