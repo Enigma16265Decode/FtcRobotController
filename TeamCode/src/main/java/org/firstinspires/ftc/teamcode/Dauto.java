@@ -175,7 +175,7 @@ public class Dauto extends OpMode {
                 .addPath(
                         new BezierLine(scorePose, parkPose)
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(220), Math.toRadians(0))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading())
                 .build();
     }
     /* You could check for
