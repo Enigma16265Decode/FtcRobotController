@@ -216,8 +216,6 @@ public class Dauto2 extends OpMode {
                 break;
             case 4:
                 if(!follower.isBusy()) {
-                    intake.setIntakePower(0);
-
                     shoot();
                     if(canProceed) {
                         follower.followPath(moveToBeforeStack1);

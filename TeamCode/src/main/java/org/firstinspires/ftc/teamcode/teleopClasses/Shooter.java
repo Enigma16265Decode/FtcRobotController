@@ -290,6 +290,11 @@ public class Shooter {
         }
     }
 
+    public double getVelocityError() {
+        double velocityError = targetSpeed - (primaryShooter.getVelocity()*-1);
+        return velocityError;
+    }
+
     public void setHoodForClose() {
         hoodLeft.setPosition(closeHood);
     }

@@ -82,6 +82,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("Turret Offset: ", turret.getOffset());
         telemetry.addData("Shooting Range: ", shooter.getShootingRangeString());
         telemetry.addData("Gate Pos", shooter.getGatePos());
+        telemetry.addData("velocity error: ", shooter.getVelocityError());
         //telemetry.addData("presses: ", shooter.getPresses());
 
         telemetry.update();
