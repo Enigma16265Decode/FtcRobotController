@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-public enum Alliances {
-    RED,
-    BLUE
+public enum AutoTypes {
+    CLOSE,
+    FAR
 }
