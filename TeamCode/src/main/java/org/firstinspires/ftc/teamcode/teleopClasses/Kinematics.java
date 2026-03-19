@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.teleopClasses;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.Alliances;
+
 public class Kinematics { //this does a lot of the calculations/logic
     Follower follower;
     Pose goalPose;
@@ -37,7 +39,7 @@ public class Kinematics { //this does a lot of the calculations/logic
         }
     }
 
-    public double getHeadingToGoal(boolean isRed) {
+    public double getHeadingToGoal() {
         Pose effectiveGoalPose = new Pose(
                 goalPose.getX() /*+ follower.getVelocity().getXComponent()*/,
                 goalPose.getY() /*+ follower.getVelocity().getYComponent()*/);
@@ -50,10 +52,10 @@ public class Kinematics { //this does a lot of the calculations/logic
 
         double unwrappedDegrees = turretHeadingDegrees;
 
-        if(unwrappedDegrees > 180.0) {
+        if(unwrappedDegrees > 270.0) { //changing this to 270 from 180
             unwrappedDegrees -= 360.0;
         }
-        if(unwrappedDegrees < -180) {
+        if(unwrappedDegrees < -270.0) {
             unwrappedDegrees += 360.0;
         }
 

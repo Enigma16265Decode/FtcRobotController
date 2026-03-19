@@ -8,6 +8,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.LimelightStates;
 
@@ -18,12 +19,13 @@ public class LimelightTest extends OpMode {
     LimelightStates limelightState;
     private Limelight3A limelight;
     CRServo servo;
+    private double px;
 
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         servo = hardwareMap.get(CRServo.class, "servo");
-        servo.setDirection(CRServo.Direction.FORWARD);
+        servo.setDirection(CRServo.Direction.REVERSE);
 
         telemetry.setMsTransmissionInterval(11);
 
@@ -51,13 +53,13 @@ public class LimelightTest extends OpMode {
         long staleness = result.getStaleness();
         if(result.isValid() && id != 0 && staleness < 100) {
             double threshold = 4;
-            if(tx > threshold) {
+            if(tx < -threshold) {
                 limelightState = LimelightStates.OFF_LEFT;
             }
-            if(tx < (threshold*-1)) {
+            else if(tx > threshold) {
                 limelightState = LimelightStates.OFF_RIGHT;
             }
-            if(tx < threshold && tx > (threshold*-1)) {
+            else {
                 limelightState = LimelightStates.CENTERED;
             }
         }
@@ -67,34 +69,46 @@ public class LimelightTest extends OpMode {
     }
 
     private void setLimelightStateHuman(LLResult result) {
-        long staleness = result.getStaleness();
-
         //boolean isHuman = result.getFiducialResults().equals("person") //result.getClassName().equals("person");
+        long staleness = 999;
 
-        if(result != null && result.isValid()){
-            List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+        px = 0;
+        if(result != null && result.isValid()) {
+            staleness = result.getStaleness();
 
-            for(Object d : detections){
-                telemetry.addData("Class", d.getClass().getName());
-                telemetry.addData("Confidence", d.getClass().getName());
+            List<LLResultTypes.DetectorResult> detections =
+                    result.getDetectorResults();
+
+            for(LLResultTypes.DetectorResult detection : detections) {
+                if(detection.getClassName().equals("person")) {
+                    px = detection.getTargetXDegrees();
+                    telemetry.addData("Class", detection.getClassName());
+
+                    telemetry.addData("TargetX", detection.getTargetXDegrees());
+
+                    telemetry.addLine("------------------");
+                }
             }
         }
+        else {
+            telemetry.addLine("No detections");
+        }
 
-        double tx = result.getTx();
         if(result.isValid() && staleness < 100) {
             double threshold = 4;
 
-            if(tx > threshold) {
+            if(px < -threshold) {
                 limelightState = LimelightStates.OFF_LEFT;
             }
-            else if(tx < -threshold) {
+            else if(px > threshold) {
                 limelightState = LimelightStates.OFF_RIGHT;
             }
             else {
                 limelightState = LimelightStates.CENTERED;
             }
 
-        } else {
+        }
+        else {
             limelightState = LimelightStates.LOST;
         }
     }
@@ -102,16 +116,13 @@ public class LimelightTest extends OpMode {
 
     private void trackAprilTags(LLResult result) {
         if (result.isValid()) {
-            double tx = result.getTx();
-
-            double amountToMove = (tx / 100);
             if (limelightState == LimelightStates.OFF_LEFT) {
                 //servo.setPosition(servo.getPosition() + amountToMove);
-                servo.setPower(-0.1);
+                servo.setPower(-0.05);
             }
             if (limelightState == LimelightStates.OFF_RIGHT) {
                 //servo.setPosition(servo.getPosition() - amountToMove);
-                servo.setPower(0.1);
+                servo.setPower(0.05);
             }
             if (limelightState == LimelightStates.CENTERED || limelightState == LimelightStates.LOST) {
                 servo.setPower(0);
@@ -122,38 +133,41 @@ public class LimelightTest extends OpMode {
             telemetry.addData("ty", result.getTy());
             telemetry.addData("off", limelightState);
         }
+        else {
+            servo.setPower(0);
+        }
     }
 
     private void trackHumans(LLResult result) {
         if (result.isValid()) {
-            double tx = result.getTx();
-
-            double amountToMove = (tx / 100);
             if (limelightState == LimelightStates.OFF_LEFT) {
                 //servo.setPosition(servo.getPosition() + amountToMove);
-                servo.setPower(-0.1);
+                servo.setPower(-0.06);
             }
             if (limelightState == LimelightStates.OFF_RIGHT) {
                 //servo.setPosition(servo.getPosition() - amountToMove);
-                servo.setPower(0.1);
+                servo.setPower(0.06);
             }
             if (limelightState == LimelightStates.CENTERED || limelightState == LimelightStates.LOST) {
                 servo.setPower(0);
             }
 
 
-            telemetry.addData("tx", result.getTx());
-            telemetry.addData("ty", result.getTy());
+            //telemetry.addData("tx", result.getTx());
+            telemetry.addData("px", px);
             telemetry.addData("off", limelightState);
             telemetry.addData("name", result.getClass().getName());
+        }
+        else {
+            servo.setPower(0);
         }
     }
 
     @Override
     public void loop() {
         LLResult result = limelight.getLatestResult();
-        setLimelightStateHuman(result);
+        setLimelightState(result);
 
-        trackHumans(result);
+        trackAprilTags(result);
     }
 }

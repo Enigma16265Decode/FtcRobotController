@@ -31,13 +31,12 @@ public class MainTeleOp extends OpMode {
     Turret turret;
 
     private Follower follower;
+    private Alliances alliance;
     private static final Pose startingPose = new Pose(105,72, Math.toRadians(0));
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
-
-    private boolean isRed;
     public Pose goalPose() {
-        if(isRed) {
+        if(alliance == Alliances.RED) {
             return new Pose(135, 141);
         }
         else {
@@ -47,10 +46,10 @@ public class MainTeleOp extends OpMode {
 
     public MainTeleOp(Alliances alliance) {
         if(alliance == Alliances.RED) {
-            isRed = true;
+            alliance = Alliances.RED;
         }
         else {
-            isRed = false;
+            alliance = Alliances.BLUE;
         }
     }
 
@@ -79,7 +78,6 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("Hood Pos: ", shooter.getHoodPos());
         telemetry.addData("Shooter Power : ", shooter.getShooterPower());
         telemetry.addData("Shooter vel: ", shooter.getShooterVelocity());
-        telemetry.addData("Turret Offset: ", turret.getOffset());
         telemetry.addData("Shooting Range: ", shooter.getShootingRangeString());
         telemetry.addData("Gate Pos", shooter.getGatePos());
         telemetry.addData("velocity error: ", shooter.getVelocityError());
@@ -93,11 +91,11 @@ public class MainTeleOp extends OpMode {
 
     private void runTeleOp() {
         drive.fieldCentricDrive();
-        drive.poseController(isRed);
+        drive.poseController(alliance);
         shooter.toggleShootingRange();
         shooter.hoodControl();
         shooter.shooterController();
-        shooter.turretController(isRed);
+        shooter.turretController();
         shooter.setRgbBasedOnDistance();
         intake.intakeController();
 
@@ -106,7 +104,7 @@ public class MainTeleOp extends OpMode {
 
     @Override
     public void init_loop() {
-        telemetry.addData("Current Turret Pos:",turret.getAbsoluteCurrentPos());
+        telemetry.addData("Current Turret Pos:",turret.getCurrentPos());
     }
 
     @Override
@@ -126,7 +124,7 @@ public class MainTeleOp extends OpMode {
 
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower); //1
         kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, false); //3
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, alliance); //3
         shooter = new Shooter(hardwareMap, gamepad1, turret, kinematics); //4
         intake = new Intake(hardwareMap, gamepad1, shooter); //5
     }

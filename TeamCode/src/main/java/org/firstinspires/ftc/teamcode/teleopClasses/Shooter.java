@@ -238,10 +238,9 @@ public class Shooter {
 
 
     }
-    public void turretController(boolean isRed) {
-        turret.setTargetBasedOnHeadingToGoal(isRed);
+    public void turretController() {
+        turret.setTargetBasedOnHeadingToGoal();
         turret.moveTurret();
-        turret.setOffset();
     }
 
     int presses = 0;

@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.Alliances;
+
 public class Drive {
     private HardwareMap hardwareMap;
     private Gamepad gamepad1;
@@ -82,8 +84,8 @@ public class Drive {
         //telemetryM.debug("automatedDrive", automatedDrive);
     }
 
-    public void resetPose(boolean red) {
-        if(red) {
+    public void resetPose(Alliances alliance) {
+        if(alliance == Alliances.RED) {
             follower.setPose(new Pose(8, 8, Math.toRadians(0)));
         }
         else {
@@ -92,9 +94,9 @@ public class Drive {
         }
     }
 
-    public void poseController(boolean red) {
+    public void poseController(Alliances alliance) {
         if(gamepad1.yWasPressed() || gamepad2.yWasPressed()) {
-            resetPose(red);
+            resetPose(alliance);
         }
     }
 

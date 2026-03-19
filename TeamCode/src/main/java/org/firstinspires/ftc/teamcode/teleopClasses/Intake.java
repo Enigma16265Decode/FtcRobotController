@@ -5,13 +5,14 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Intake { //This also does transfer
-    private DcMotor intake;
+    private DcMotor frontIntake, backIntake;
     private Gamepad gamepad1;
     private HardwareMap hardwareMap;
     private Shooter shooter;
 
     public Intake(HardwareMap hardwareMap, Gamepad gamepad1, Shooter shooter) {
-        intake = hardwareMap.get(DcMotor.class, "intake");
+        frontIntake = hardwareMap.get(DcMotor.class, "frontIntake");
+        backIntake = hardwareMap.get(DcMotor.class, "backIntake");
 
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
@@ -19,25 +20,30 @@ public class Intake { //This also does transfer
     }
 
     public void setIntakePower(double toSet) {
-        intake.setPower(toSet);
+        frontIntake.setPower(toSet);
+        backIntake.setPower(toSet/2);
     }
 
     /** Runs the intake based on gamepad input **/
     public void intakeController() {
         if(gamepad1.right_trigger > 0.4) {
-            intake.setPower(1);
+            frontIntake.setPower(1);
+            backIntake.setPower(0.6);
         }
         else {
             if(gamepad1.left_trigger > 0.4) {
-                intake.setPower(-1);
+                frontIntake.setPower(1);
+                backIntake.setPower(-0.6);
             }
             else {
-                intake.setPower(0);
+                frontIntake.setPower(0);
+                backIntake.setPower(0);
             }
         }
         if(gamepad1.x) {
             if(shooter.isShooterAtSpeed()) {
-                intake.setPower(1);
+                frontIntake.setPower(1);
+                backIntake.setPower(1);
             }
         }
     }
