@@ -10,7 +10,8 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.IndicatorColors;
+import org.firstinspires.ftc.teamcode.enums.IndicatorColors;
+import org.firstinspires.ftc.teamcode.enums.IntakeModes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class Shooter {
     private final Gamepad gamepad1;
     private final HardwareMap hardwareMap;
     private Turret turret;
+    private Intake intake;
     private Kinematics kinematics;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1100;
@@ -46,7 +48,7 @@ public class Shooter {
     Map<IndicatorColors, Double> indicatorColorsDouble = new HashMap<>();
     Map<Integer, Double> distanceFromVelocity = new HashMap<>();
 
-    public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Kinematics kinematics) {
+    public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Intake intake, Kinematics kinematics) {
         shooterController = new PIDController(sP, sI, sD);
 
         indicator = hardwareMap.get(Servo.class, "indicator");
@@ -64,6 +66,7 @@ public class Shooter {
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
         this.turret = turret;
+        this.intake = intake;
         this.kinematics = kinematics;
     }
 

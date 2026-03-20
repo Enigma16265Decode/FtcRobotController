@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.teleopClasses;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
-import org.firstinspires.ftc.teamcode.Alliances;
-
 public class Kinematics { //this does a lot of the calculations/logic
     Follower follower;
     Pose goalPose;

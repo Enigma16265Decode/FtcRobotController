@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -9,9 +8,9 @@ import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.bylazar.telemetry.PanelsTelemetry;
 
+import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
@@ -122,10 +121,10 @@ public class MainTeleOp extends OpMode {
     public void init() {
         initialize();
 
-        drive = new Drive(hardwareMap, gamepad1, gamepad2, follower); //1
-        kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, alliance); //3
-        shooter = new Shooter(hardwareMap, gamepad1, turret, kinematics); //4
-        intake = new Intake(hardwareMap, gamepad1, shooter); //5
+        intake = new Intake(hardwareMap, gamepad1);
+        drive = new Drive(hardwareMap, gamepad1, gamepad2, follower);
+        kinematics = new Kinematics(follower, goalPose());
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, alliance);
+        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 }

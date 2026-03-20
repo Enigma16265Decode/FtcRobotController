@@ -8,13 +8,11 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-import org.firstinspires.ftc.teamcode.Alliances;
-import org.firstinspires.ftc.teamcode.R;
+import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
 import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
@@ -500,10 +498,10 @@ public class DautoMaster extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true); //3
-        shooter = new Shooter(hardwareMap, gamepad1, turret, kinematics); //4
-        intake = new Intake(hardwareMap, gamepad1, shooter); //5
+        intake = new Intake(hardwareMap, gamepad1);
+        kinematics = new Kinematics(follower, goalPose());
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true);
+        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();

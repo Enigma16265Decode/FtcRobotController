@@ -468,10 +468,10 @@ public class Dauto2 extends OpMode {
     /** This method is called once at the init of the OpMode. **/
     @Override
     public void init() {
-        kinematics = new Kinematics(follower, goalPose()); //2
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true); //3
-        shooter = new Shooter(hardwareMap, gamepad1, turret, kinematics); //4
-        intake = new Intake(hardwareMap, gamepad1, shooter); //5
+        intake = new Intake(hardwareMap, gamepad1);
+        kinematics = new Kinematics(follower, goalPose());
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true);
+        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
