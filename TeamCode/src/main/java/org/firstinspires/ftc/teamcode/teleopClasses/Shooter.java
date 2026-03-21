@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleopClasses;
 import androidx.annotation.NonNull;
 
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -30,6 +31,7 @@ public class Shooter {
     private Turret turret;
     private Intake intake;
     private Kinematics kinematics;
+    private Timer shootTimer;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1100;
     public double gateClosed = 0.07;
@@ -37,6 +39,7 @@ public class Shooter {
     private boolean shootToggle = false;
     private boolean gateToggle = false;
     private boolean shooterStopped = false;
+    private int shootingState = -1;
     private PIDController shooterController;
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
@@ -80,6 +83,45 @@ public class Shooter {
         indicatorColorsDouble.put(IndicatorColors.GREEN, 0.46);
         indicatorColorsDouble.put(IndicatorColors.BLUE, 0.61);
         indicatorColorsDouble.put(IndicatorColors.PURPLE, 0.7);
+    }
+
+    public void shootControl() {
+        if(gamepad1.xWasPressed()) {
+            if(turret.turretReadyToShoot() && isShooterAtSpeed()) {
+                shoot();
+            }
+        }
+    }
+
+    public void shoot() {
+        if(shootingState == -1) {
+            shootingState = 0;
+        }
+        tryShooting();
+    }
+
+    public void tryShooting() {
+        switch (shootingState) {
+            case 0:
+                shootTimer.resetTimer();
+                setGateOpen();
+                shootingState = 1;
+                break;
+            case 1:
+                if(shootTimer.getElapsedTime() >= 300) {
+                    intake.setIntakeMode(IntakeModes.SHOOT);
+                    shootTimer.resetTimer();
+                    shootingState = 2;
+                }
+                break;
+            case 2:
+                if(shootTimer.getElapsedTime() >= 1700) {
+                    intake.setIntakeMode(IntakeModes.IDLE);
+                    setGateClosed();
+                    shootingState = -1;
+                }
+                break;
+        }
     }
 
     public boolean isShooterAtSpeed() {
@@ -199,7 +241,6 @@ public class Shooter {
         double currentVelocity = primaryShooter.getVelocity() * -1;
         targetSpeed = targetSpeedBasedOnDistance();
 
-
         if(gamepad1.b && gamepad1.bWasPressed()) {
             boolean stateBeforeToggle = gateToggle;
             if(stateBeforeToggle) {
@@ -209,8 +250,6 @@ public class Shooter {
                 gateToggle = true;
             }
         }
-
-
 
         if(gamepad1.right_bumper && gamepad1.rightBumperWasPressed()) {
             boolean stateBeforeToggle = shootToggle;
@@ -238,23 +277,10 @@ public class Shooter {
             gate.setPosition(gateClosed);
         }
 
-
-
     }
     public void turretController() {
         turret.setTargetBasedOnHeadingToGoal();
         turret.moveTurret();
-    }
-
-    int presses = 0;
-    public void gateController() {
-        if(gamepad1.bWasPressed() && gamepad1.b) {
-            toggleGate();
-            presses += 1;
-        }
-    }
-    public int getPresses() {
-        return presses;
     }
 
     public void setShooterStopped(boolean stop) {

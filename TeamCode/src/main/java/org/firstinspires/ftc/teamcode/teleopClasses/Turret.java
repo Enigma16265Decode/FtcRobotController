@@ -64,6 +64,15 @@ public class Turret {
         setTurretPosition(targetPos);
     }
 
+    public boolean turretReadyToShoot() {
+        if(limelight.getLimelightState() == LimelightStates.CENTERED) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     private void setTurretPosition(double position) {
         final double offset = 0;
         turret1.setPosition(position);

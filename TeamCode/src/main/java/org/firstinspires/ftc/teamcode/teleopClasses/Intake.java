@@ -51,15 +51,17 @@ public class Intake { //This also does transfer
 
     /** Runs the intake based on gamepad input **/
     public void intakeController() {
-        if(gamepad1.right_trigger > 0.4) {
-            setIntakeMode(IntakeModes.INTAKE);
-        }
-        else {
-            if(gamepad1.left_trigger > 0.4) {
-                setIntakeMode(IntakeModes.OUTTAKE);
+        if(intakeMode != IntakeModes.SHOOT) {
+            if(gamepad1.right_trigger > 0.4) {
+                setIntakeMode(IntakeModes.INTAKE);
             }
             else {
-                setIntakeMode(IntakeModes.IDLE);
+                if(gamepad1.left_trigger > 0.4) {
+                    setIntakeMode(IntakeModes.OUTTAKE);
+                }
+                else {
+                    setIntakeMode(IntakeModes.IDLE);
+                }
             }
         }
         runIntake();
