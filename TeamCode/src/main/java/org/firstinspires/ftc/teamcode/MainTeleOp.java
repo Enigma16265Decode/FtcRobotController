@@ -129,7 +129,7 @@ public class MainTeleOp extends OpMode {
         intake = new Intake(hardwareMap, gamepad1);
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower);
         kinematics = new Kinematics(follower, goalPose());
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, limelight, alliance);
+        turret = new Turret(hardwareMap, kinematics, limelight, alliance);
         shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 }
