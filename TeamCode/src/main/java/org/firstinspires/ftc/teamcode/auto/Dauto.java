@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.auto; // make sure this aligns with class location
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -11,25 +11,29 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+
+import org.firstinspires.ftc.teamcode.enums.Alliances;
+import org.firstinspires.ftc.teamcode.enums.Sides;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
 import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
+import org.firstinspires.ftc.teamcode.teleopClasses.LimelightSS;
 import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
-
-@Autonomous(name = "Beuford the auto (Blue)", group = "Examples")
-public class Dauto2 extends OpMode {
+@Autonomous(name = "Ronald the auto (Red)", group = "Examples")
+public class Dauto extends OpMode {
+    LimelightSS limelight;
     Intake intake;
     Shooter shooter;
     Kinematics kinematics;
     Turret turret;
-    ShootingStates currentShootingState = ShootingStates.IDLE;
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, shooterTimer;
-    boolean isRed = true;
+    private Alliances alliance;
+    private Sides side;
     private Pose goalPose() {
-        if(isRed) {
+        if(alliance == Alliances.RED) {
             return new Pose(138, 142);
         }
         else {
@@ -41,31 +45,56 @@ public class Dauto2 extends OpMode {
     private int pathState;
     int holdStage = 0;
 
-    private final double intakeDriveSpeed = 0.8, normalDriveSpeed = 1;
-
-    private final Pose startPose = new Pose(144-119, 130, Math.toRadians(315)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(144-91, 98, Math.toRadians(315));
-    private final Pose beforePickupStack1 = new Pose(144-81, 85, toR(180));
-    private final Pose stack1 = new Pose(144-124,85,toR(180));
-    private final Pose beforePickupStack2 = new Pose(144-94, 62, toR(180)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
-    private final Pose pickupStack2Control = new Pose(144-123, 58);
-    private final Pose stack2 = new Pose(144-127,63,toR(180)); //59
-    private final Pose shoot3rdControl = new Pose(144-90,64);
-    private final Pose beforePickupStack3 = new Pose(144-86, 37, toR(180));
-    private final Pose stack3 = new Pose(144-127,37,toR(180));
-    private final Pose parkPose = new Pose(144-105,72, toR(180));
-
+    private final double intakeDriveSpeed = 0.8, normalDriveSpeed = 1; //todo refactor this out, replace with pathchain actions
+    private Pose startPose = new Pose(119, 130, Math.toRadians(222)); // Start Pose of our robot.
+    private Pose scorePose = new Pose(91, 98, Math.toRadians(222));
+    private Pose beforePickupStack1 = new Pose(81, 85, toR(0));
+    private Pose stack1 = new Pose(124,85,toR(0));
+    private Pose beforePickupStack2 = new Pose(94, 62, toR(0)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
+    private Pose pickupStack2Control = new Pose(123, 58);
+    private Pose stack2 = new Pose(127,63,toR(0)); //59
+    private Pose shoot3rdControl = new Pose(90,64);
+    private Pose beforePickupStack3 = new Pose(86, 37, toR(0));
+    private Pose stack3 = new Pose(127,37,toR(0));
+    private Pose parkPose = new Pose(105,72, toR(0));
+    private void mirrorPaths() {
+        if(alliance == Alliances.BLUE) {
+            startPose = new Pose(119, 130, Math.toRadians(222)); // Start Pose of our robot.
+            scorePose = new Pose(91, 98, Math.toRadians(222));
+            beforePickupStack1 = new Pose(81, 85, toR(0));
+            stack1 = new Pose(124,85,toR(0));
+            beforePickupStack2 = new Pose(94, 62, toR(0)); //private final Pose beforePickupStack2 = new Pose(86, 62, toR(0));
+            pickupStack2Control = new Pose(123, 58);
+            stack2 = new Pose(127,63,toR(0)); //59
+            shoot3rdControl = new Pose(90,64);
+            beforePickupStack3 = new Pose(86, 37, toR(0));
+            stack3 = new Pose(127,37,toR(0));
+            parkPose = new Pose(105,72, toR(0));
+        }
+        //todo do the same for far
+    }
 
     ElapsedTime shootTimer = new ElapsedTime();
     ElapsedTime holdTimer = new ElapsedTime();
     int shootStage = 0;
 
+    //for close
     private Path scorePreload;
     private PathChain moveToBeforeStack1, pickupStack1, score2ndLoad, moveToBeforeStack2, pickupStack2, score3rdLoad, moveToBeforeStack3, pickupStack3, score4thLoad, park;
 
-    private double toR(double toRadian) {
-        return Math.toRadians(toRadian);
+
+    //constructor
+    public Dauto(Alliances alliance, Sides side) {
+        this.alliance = alliance;
+        this.side = side;
     }
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            turret.moveTurret();
+        }
+    };
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
@@ -78,6 +107,7 @@ public class Dauto2 extends OpMode {
                         new BezierLine(scorePose, beforePickupStack1)
                 )
                 .setLinearHeadingInterpolation(scorePose.getHeading(), beforePickupStack1.getHeading())
+                .addParametricCallback(50, runnable)
                 .build();
 
         pickupStack1 = follower
@@ -289,6 +319,10 @@ public class Dauto2 extends OpMode {
         shooter.accelerateShooterPID();
     }
 
+    private double toR(double toRadian) {
+        return Math.toRadians(toRadian);
+    }
+
 
     private void holdIntake() {
         canProceedIntake = false;
@@ -470,7 +504,7 @@ public class Dauto2 extends OpMode {
     public void init() {
         intake = new Intake(hardwareMap, gamepad1);
         kinematics = new Kinematics(follower, goalPose());
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, true);
+        turret = new Turret(hardwareMap, kinematics, limelight, true);
         shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
 
         pathTimer = new Timer();

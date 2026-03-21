@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
 import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
+import org.firstinspires.ftc.teamcode.teleopClasses.LimelightSS;
 import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
@@ -23,6 +24,7 @@ import java.util.function.Supplier;
 //@Configurable
 //@TeleOp(name = "! SC TeleOP \uD83D\uDFE5")
 public class MainTeleOp extends OpMode {
+    LimelightSS limelight;
     Intake intake;
     Shooter shooter;
     Drive drive;
@@ -89,6 +91,8 @@ public class MainTeleOp extends OpMode {
 
 
     private void runTeleOp() {
+        limelight.limelightController();
+
         drive.fieldCentricDrive();
         drive.poseController(alliance);
         shooter.toggleShootingRange();
@@ -121,10 +125,11 @@ public class MainTeleOp extends OpMode {
     public void init() {
         initialize();
 
+        limelight = new LimelightSS(hardwareMap, alliance);
         intake = new Intake(hardwareMap, gamepad1);
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower);
         kinematics = new Kinematics(follower, goalPose());
-        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, alliance);
+        turret = new Turret(hardwareMap, gamepad1, gamepad2, kinematics, limelight, alliance);
         shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 }
