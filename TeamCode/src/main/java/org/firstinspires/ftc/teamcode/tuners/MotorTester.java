@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "wheel tester swag", group = "tuners")
 public class MotorTester extends OpMode {
-    String motor1Name = "leftShooter", motor2Name = "leftFront", motor3Name = "rightRear", motor4Name = "rightFront";
+    String motor1Name = "leftRear", motor2Name = "leftFront", motor3Name = "rightRear", motor4Name = "rightFront";
     DcMotor motor1, motor2, motor3, motor4;
 
     @Override
@@ -22,7 +22,7 @@ public class MotorTester extends OpMode {
     public void start() {
     }
     private void runWheels() {
-        double power = 0.2;
+        double power = 0.4;
         if(gamepad1.x) {
             motor1.setPower(power);
         }

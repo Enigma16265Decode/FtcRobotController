@@ -91,29 +91,30 @@ public class MainTeleOp extends OpMode {
 
 
     private void runTeleOp() {
-        limelight.limelightController();
+        //limelight.limelightController();
 
         drive.fieldCentricDrive();
         drive.poseController(alliance);
-        shooter.toggleShootingRange();
-        shooter.hoodControl();
-        shooter.shooterController();
-        shooter.turretController();
-        shooter.setRgbBasedOnDistance();
+        //shooter.toggleShootingRange();
+        //shooter.hoodControl();
+        //shooter.shooterController();
+        //shooter.turretController();
+        //shooter.setRgbBasedOnDistance();
+        //shooter.shootControl();
         intake.intakeController();
 
-        telemetry();
+        //telemetry();
     }
 
     @Override
     public void init_loop() {
-        telemetry.addData("Current Turret Pos:",turret.getCurrentPos());
+        //telemetry.addData("Current Turret Pos:",turret.getCurrentPos());
     }
 
     @Override
     public void start() {
         follower.startTeleopDrive();
-        shooter.initHood();
+        //shooter.initHood();
     }
 
     @Override
@@ -125,11 +126,11 @@ public class MainTeleOp extends OpMode {
     public void init() {
         initialize();
 
-        limelight = new LimelightSS(hardwareMap, alliance);
+        //limelight = new LimelightSS(hardwareMap, alliance);
         intake = new Intake(hardwareMap, gamepad1);
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower);
-        kinematics = new Kinematics(follower, goalPose());
-        turret = new Turret(hardwareMap, kinematics, limelight, alliance);
-        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
+        //kinematics = new Kinematics(follower, goalPose());
+        //turret = new Turret(hardwareMap, kinematics, limelight, alliance);
+        //shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 }

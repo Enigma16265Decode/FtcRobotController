@@ -1,13 +1,16 @@
 package org.firstinspires.ftc.teamcode.teleopClasses;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.enums.IntakeModes;
 
 public class Intake { //This also does transfer
     private DcMotor frontIntake, backIntake;
+    private Servo intakeLift;
     private Gamepad gamepad1;
     private HardwareMap hardwareMap;
     private Shooter shooter;
@@ -16,6 +19,9 @@ public class Intake { //This also does transfer
     public Intake(HardwareMap hardwareMap, Gamepad gamepad1) {
         frontIntake = hardwareMap.get(DcMotor.class, "frontIntake");
         backIntake = hardwareMap.get(DcMotor.class, "backIntake");
+        intakeLift = hardwareMap.get(Servo.class, "intakeLift");
+        frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeLift.setDirection(Servo.Direction.REVERSE);
 
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
@@ -47,6 +53,7 @@ public class Intake { //This also does transfer
             frontIntake.setPower(0);
             backIntake.setPower(0);
         }
+        intakeLift.setPosition(0.65);
     }
 
     /** Runs the intake based on gamepad input **/
