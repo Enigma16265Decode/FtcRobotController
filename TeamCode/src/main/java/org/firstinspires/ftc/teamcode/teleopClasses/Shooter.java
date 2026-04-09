@@ -57,7 +57,7 @@ public class Shooter {
         indicator = hardwareMap.get(Servo.class, "indicator");
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
         secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
-        hoodLeft = hardwareMap.get(Servo.class, "leftHood");
+        hoodLeft = hardwareMap.get(Servo.class, "hood");
         gate = hardwareMap.get(Servo.class, "gate");
 
 
@@ -227,7 +227,7 @@ public class Shooter {
 
     public void accelerateShooterPID() {
         if (!shooterStopped) {
-            double currentVelocity = primaryShooter.getVelocity() * -1;
+            double currentVelocity = primaryShooter.getVelocity();
             double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
 
             setShooterPower(shooterPid);
@@ -238,7 +238,7 @@ public class Shooter {
     }
 
     public void shooterController() {
-        double currentVelocity = primaryShooter.getVelocity() * -1;
+        double currentVelocity = primaryShooter.getVelocity();
         targetSpeed = targetSpeedBasedOnDistance();
 
         if(gamepad1.b && gamepad1.bWasPressed()) {
@@ -319,7 +319,7 @@ public class Shooter {
     }
 
     public double getVelocityError() {
-        double velocityError = targetSpeed - (primaryShooter.getVelocity()*-1);
+        double velocityError = targetSpeed - (primaryShooter.getVelocity());
         return velocityError;
     }
 
@@ -350,7 +350,7 @@ public class Shooter {
     }
 
     public double getShooterVelocity() {
-        return primaryShooter.getVelocity() * -1;
+        return primaryShooter.getVelocity();
     }
 
     public String getShootingRangeString() {

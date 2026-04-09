@@ -50,10 +50,10 @@ public class Kinematics { //this does a lot of the calculations/logic
 
         double unwrappedDegrees = turretHeadingDegrees;
 
-        if(unwrappedDegrees > 270.0) { //changing this to 270 from 180
+        if(unwrappedDegrees > 330.0) { //changing this to 270 from 180
             unwrappedDegrees -= 360.0;
         }
-        if(unwrappedDegrees < -270.0) {
+        if(unwrappedDegrees < -330.0) { //cc is +
             unwrappedDegrees += 360.0;
         }
 

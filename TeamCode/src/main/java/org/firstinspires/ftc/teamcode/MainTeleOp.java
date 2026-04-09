@@ -76,6 +76,7 @@ public class MainTeleOp extends OpMode {
         double dy = goalPose().getY() - follower.getPose().getY();
         double goalHeadingRadians = Math.atan2(dy, dx);
 
+        /*
         telemetry.addData("Hood Pos: ", shooter.getHoodPos());
         telemetry.addData("Shooter Power : ", shooter.getShooterPower());
         telemetry.addData("Shooter vel: ", shooter.getShooterVelocity());
@@ -83,6 +84,11 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("Gate Pos", shooter.getGatePos());
         telemetry.addData("velocity error: ", shooter.getVelocityError());
         //telemetry.addData("presses: ", shooter.getPresses());
+
+         */
+        telemetry.addData("targetPos", turret.getTargetPos());
+        telemetry.addData("turretPos", turret.getCurrentPos());
+        telemetry.addData("deg readout", kinematics.getHeadingToGoal());
 
         telemetry.update();
     }
@@ -102,8 +108,10 @@ public class MainTeleOp extends OpMode {
         //shooter.setRgbBasedOnDistance();
         //shooter.shootControl();
         intake.intakeController();
+        turret.setTargetBasedOnHeadingToGoal();
+        turret.moveTurret();
 
-        //telemetry();
+        telemetry();
     }
 
     @Override
@@ -129,8 +137,8 @@ public class MainTeleOp extends OpMode {
         //limelight = new LimelightSS(hardwareMap, alliance);
         intake = new Intake(hardwareMap, gamepad1);
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower);
-        //kinematics = new Kinematics(follower, goalPose());
-        //turret = new Turret(hardwareMap, kinematics, limelight, alliance);
+        kinematics = new Kinematics(follower, goalPose());
+        turret = new Turret(hardwareMap, kinematics, alliance);
         //shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 }

@@ -17,7 +17,7 @@ public class ShooterPIDTuner extends OpMode {
     private TelemetryManager telemetryM;
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
-    private Servo hoodLeft;
+    private Servo hood;
     private Servo gate;
     public static double sP = 0.02, sI = 0.0, sD = 0.0;
     PIDController shooterController = new PIDController(sP, sI, sD);
@@ -26,7 +26,7 @@ public class ShooterPIDTuner extends OpMode {
 
 
     private void runPID() {
-        double currentVelocity = primaryShooter.getVelocity() * -1;
+        double currentVelocity = primaryShooter.getVelocity();
 
 
         shooterController.setPID(sP, sI, sD);
@@ -36,12 +36,12 @@ public class ShooterPIDTuner extends OpMode {
     }
 
     private void setShooterPower(double value) {
-        primaryShooter.setPower(value);
+        //primaryShooter.setPower(value);
         secondaryShooter.setPower(value);
     }
 
     private void setHoodPosition() {
-        hoodLeft.setPosition(hoodPos);
+        hood.setPosition(hoodPos);
     }
 
     @Override
@@ -56,14 +56,12 @@ public class ShooterPIDTuner extends OpMode {
         secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
 
         gate = hardwareMap.get(Servo.class, "gate");
-        hoodLeft = hardwareMap.get(Servo.class, "leftHood");
+        hood = hardwareMap.get(Servo.class, "hood");
 
-        gate.setDirection(Servo.Direction.REVERSE);
-
-        hoodLeft.setDirection(Servo.Direction.REVERSE);
+        hood.setDirection(Servo.Direction.REVERSE);
         secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        gate.setPosition(0.07);
+        gate.setPosition(0.5);
     }
     @Override
     public void start() {
@@ -76,12 +74,12 @@ public class ShooterPIDTuner extends OpMode {
         setHoodPosition();
 
         telemetryM.debug("target", targetSpeed);
-        telemetryM.debug("velocity", primaryShooter.getVelocity() * -1);
+        telemetryM.debug("velocity", primaryShooter.getVelocity());
 
         telemetryM.update();
 
         telemetry.addData("target", targetSpeed);
-        telemetry.addData("velocity", primaryShooter.getVelocity() * -1);
+        telemetry.addData("velocity", primaryShooter.getVelocity());
 
         telemetry.update();
     }

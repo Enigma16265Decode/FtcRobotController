@@ -39,7 +39,7 @@ public class Intake { //This also does transfer
     public void runIntake() {
         if(intakeMode == IntakeModes.INTAKE) {
             frontIntake.setPower(1);
-            backIntake.setPower(0.6);
+            backIntake.setPower(0.7);
         }
         if (intakeMode == IntakeModes.OUTTAKE) {
             frontIntake.setPower(-0.8);
