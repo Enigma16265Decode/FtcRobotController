@@ -7,12 +7,13 @@ public class Kinematics { //this does a lot of the calculations/logic
     Follower follower;
     Pose goalPose;
 
-    public Kinematics(Follower follower, Pose goalPose) {
+    public Kinematics(Follower follower, Pose goalPose ) {
         this.follower = follower;
         this.goalPose = goalPose;
     }
 
 
+    //This is kind of deprecated, more of an archive of what we were using
     public double getHeadingToGoalWithSpeed() {
         Pose effectiveGoalPose = new Pose(
                 goalPose.getX(), // + follower.getVelocity().getXComponent(),
@@ -45,19 +46,30 @@ public class Kinematics { //this does a lot of the calculations/logic
         double dy = effectiveGoalPose.getY() - follower.getPose().getY();
         double goalHeadingRadians = Math.atan2(dy, dx);
         double robotHeadingRadians = follower.getHeading(); //this is in radians
-        double turretHeadingRadians = goalHeadingRadians - (robotHeadingRadians - Math.PI);
+        double turretHeadingRadians = (goalHeadingRadians - robotHeadingRadians)-Math.PI;
         double turretHeadingDegrees = Math.toDegrees(turretHeadingRadians);
 
-        double unwrappedDegrees = turretHeadingDegrees;
-
-        if(unwrappedDegrees > 330.0) { //changing this to 270 from 180
-            unwrappedDegrees -= 360.0;
-        }
-        if(unwrappedDegrees < -330.0) { //cc is +
-            unwrappedDegrees += 360.0;
+        double normalized = turretHeadingDegrees % 360;
+        if (normalized < 0) {
+            normalized += 360;
         }
 
-        return unwrappedDegrees;
+        return normalized;
+    }
+
+    public double getDistanceFromGoal() {
+        return Math.sqrt(Math.pow((goalPose.getX() - follower.getPose().getX()), 2) + Math.pow((goalPose.getY() - follower.getPose().getY()), 2));
+    }
+
+    public double turretHeadingRadians() {
+        Pose effectiveGoalPose = new Pose(
+                goalPose.getX() /*+ follower.getVelocity().getXComponent()*/,
+                goalPose.getY() /*+ follower.getVelocity().getYComponent()*/);
+        double dx = effectiveGoalPose.getX() - follower.getPose().getX();
+        double dy = effectiveGoalPose.getY() - follower.getPose().getY();
+        double goalHeadingRadians = Math.atan2(dy, dx);
+        double robotHeadingRadians = follower.getHeading(); //this is in radians
+        return goalHeadingRadians - robotHeadingRadians;
     }
 
     public double getDistanceToGoal() {

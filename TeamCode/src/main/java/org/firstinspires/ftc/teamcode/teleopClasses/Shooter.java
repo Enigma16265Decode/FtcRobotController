@@ -23,8 +23,7 @@ enum ShootingRanges {
     FAR
 }
 public class Shooter {
-    private int closeSpeed = 1100, farSpeed = 1350;
-    private double closeHood = 0.85, farHood = 0.4;
+    private int closeSpeed = 1200, farSpeed = 1450;
     ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1;
     private final HardwareMap hardwareMap;
@@ -33,9 +32,9 @@ public class Shooter {
     private Kinematics kinematics;
     private Timer shootTimer;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
-    public static int targetSpeed = 1100;
-    public double gateClosed = 0.07;
-    public double gateOpen = 0.9;
+    public static int targetSpeed = 1200;
+    public double gateClosed = 0.3;
+    public double gateOpen = 0.8;
     private boolean shootToggle = false;
     private boolean gateToggle = false;
     private boolean shooterStopped = false;
@@ -43,26 +42,23 @@ public class Shooter {
     private PIDController shooterController;
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
-    private Servo hoodLeft;
+    private Servo hood;
     private Servo gate;
-    private Servo indicator;
-    private int[] closeVelocities = {1100, 1170, 1270, 1170};
-    private double[] closeDistances = {64, 76, 88};
-    Map<IndicatorColors, Double> indicatorColorsDouble = new HashMap<>();
-    Map<Integer, Double> distanceFromVelocity = new HashMap<>();
+    private double[] closeHoodPoses = {0.4, 0.5, 0.6, 0.8, 0.8};
+    private double[] closeDistances = {52, 64, 76, 88};
+    Map<Double, Double> distanceFromHoodPos = new HashMap<>();
 
     public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Intake intake, Kinematics kinematics) {
         shooterController = new PIDController(sP, sI, sD);
 
-        indicator = hardwareMap.get(Servo.class, "indicator");
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
         secondaryShooter = hardwareMap.get(DcMotor.class, "rightShooter");
-        hoodLeft = hardwareMap.get(Servo.class, "hood");
+        hood = hardwareMap.get(Servo.class, "hood");
         gate = hardwareMap.get(Servo.class, "gate");
 
 
         secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
-        hoodLeft.setDirection(Servo.Direction.REVERSE);
+        gate.setDirection(Servo.Direction.REVERSE);
 
         initializeMaps();
 
@@ -73,25 +69,25 @@ public class Shooter {
         this.kinematics = kinematics;
     }
 
+
+
     /** Adds values into maps **/
     private void initializeMaps() {
-        distanceFromVelocity.put(closeVelocities[0], closeDistances[0]);
-        distanceFromVelocity.put(closeVelocities[1], closeDistances[1]);
-        distanceFromVelocity.put(closeVelocities[2], closeDistances[2]);
-
-        indicatorColorsDouble.put(IndicatorColors.RED, 0.282);
-        indicatorColorsDouble.put(IndicatorColors.GREEN, 0.46);
-        indicatorColorsDouble.put(IndicatorColors.BLUE, 0.61);
-        indicatorColorsDouble.put(IndicatorColors.PURPLE, 0.7);
+        distanceFromHoodPos.put(closeHoodPoses[0], closeDistances[0]);
+        distanceFromHoodPos.put(closeHoodPoses[1], closeDistances[1]);
+        distanceFromHoodPos.put(closeHoodPoses[2], closeDistances[2]);
     }
 
+    /*
     public void shootControl() {
-        if(gamepad1.xWasPressed()) {
+        if(gamepad1.bWasPressed()) {
             if(turret.turretReadyToShoot() && isShooterAtSpeed()) {
                 shoot();
             }
         }
     }
+
+     */
 
     public void shoot() {
         if(shootingState == -1) {
@@ -99,6 +95,7 @@ public class Shooter {
         }
         tryShooting();
     }
+
 
     public void tryShooting() {
         switch (shootingState) {
@@ -124,16 +121,6 @@ public class Shooter {
         }
     }
 
-    public boolean isShooterAtSpeed() {
-        //used by auto so should fine to be hard coded, also writing this comment where spur the moment, time is of the essence
-        if((getShooterVelocity() > 1030) && (getShooterVelocity() < 1120)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
 
     /** Checks if x is off by less than y amount in either direction (positive or negative) **/
     public boolean betweenMinMaxWithTolerance(double x, double ideal, double off) {
@@ -148,8 +135,6 @@ public class Shooter {
         }
     }
 
-
-
     public void setShooterPower(double value) {
         primaryShooter.setPower(value);
         secondaryShooter.setPower(value);
@@ -158,49 +143,13 @@ public class Shooter {
     /** Toggles shootingRange between ShootingRanges.CLOSE and ShootingRanges.FAR based on gamepad input **/
     public void toggleShootingRange() {
         ShootingRanges initialState = shootingRange;
-        if (gamepad1.xWasPressed()) {
+        if (gamepad1.aWasPressed()) {
             if(initialState == ShootingRanges.CLOSE) {
                 shootingRange = ShootingRanges.FAR;
             }
             if(initialState == ShootingRanges.FAR) {
                 shootingRange = ShootingRanges.CLOSE;
             }
-            setHardwareShootingState();
-        }
-    }
-
-    public void setHardwareShootingState() {
-        if(shootingRange == ShootingRanges.CLOSE) {
-            targetSpeed = closeSpeed;
-            setHoodPos(closeHood);
-        }
-        if(shootingRange == ShootingRanges.FAR) {
-            targetSpeed = farSpeed;
-            setHoodPos(farHood);
-        }
-    }
-
-    public ShootingRanges getShootingRange() {
-        return shootingRange;
-    }
-
-    public void initHood() {
-        setHoodPos(closeHood);
-    }
-
-    /** Sets the indicator light's color based on getDistanceIndex() **/
-    public void setRgbBasedOnDistance() {
-        if(getDistanceIndex() == 0) {
-            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.GREEN));
-        }
-        if(getDistanceIndex() == 1) {
-            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.BLUE));
-        }
-        if(getDistanceIndex() == 2) {
-            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.PURPLE));
-        }
-        if(getDistanceIndex() == 3) {
-            indicator.setPosition(indicatorColorsDouble.get(IndicatorColors.RED));
         }
     }
 
@@ -218,30 +167,33 @@ public class Shooter {
         if(betweenMinMaxWithTolerance(distance, closeDistances[2], off)) {
             return 2;
         }
-        return 3;
+        if(betweenMinMaxWithTolerance(distance, closeDistances[3], off)) {
+            return 3;
+        }
+        return 4;
     }
 
-    private int targetSpeedBasedOnDistance() {
-        return closeVelocities[getDistanceIndex()];
-    }
-
-    public void accelerateShooterPID() {
-        if (!shooterStopped) {
-            double currentVelocity = primaryShooter.getVelocity();
-            double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
-
-            setShooterPower(shooterPid);
+    private void setShooterVelocityBasedOnMode() {
+        if(shootingRange == ShootingRanges.CLOSE) {
+            targetSpeed = closeSpeed;
         }
         else {
-            setShooterPower(0);
+            targetSpeed = farSpeed;
         }
     }
+
+    private double hoodPosBasedOnDistance() {
+        return closeHoodPoses[getDistanceIndex()];
+    }
+
 
     public void shooterController() {
         double currentVelocity = primaryShooter.getVelocity();
-        targetSpeed = targetSpeedBasedOnDistance();
+        setShooterVelocityBasedOnMode();
+        setHoodPos(hoodPosBasedOnDistance());
 
-        if(gamepad1.b && gamepad1.bWasPressed()) {
+
+        if(gamepad1.bWasPressed()) {
             boolean stateBeforeToggle = gateToggle;
             if(stateBeforeToggle) {
                 gateToggle = false;
@@ -250,7 +202,6 @@ public class Shooter {
                 gateToggle = true;
             }
         }
-
         if(gamepad1.right_bumper && gamepad1.rightBumperWasPressed()) {
             boolean stateBeforeToggle = shootToggle;
             if(stateBeforeToggle) {
@@ -277,55 +228,20 @@ public class Shooter {
             gate.setPosition(gateClosed);
         }
 
+
     }
     public void turretController() {
         turret.setTargetBasedOnHeadingToGoal();
         turret.moveTurret();
     }
 
-    public void setShooterStopped(boolean stop) {
-        shooterStopped = stop;
-    }
+
 
 
     private void setHoodPos(double value) {
-        hoodLeft.setPosition(value);
+        hood.setPosition(value);
     }
 
-    public void hoodControl() {
-        final double lowestValue = 0.0;
-        final double highestValue = 1.0;
-        final double amountToMove = 0.05;
-
-        if(gamepad1.dpad_right && gamepad1.dpadRightWasPressed()) {
-            double toSet = (hoodLeft.getPosition() - amountToMove);
-            if (toSet < lowestValue) {
-                setHoodPos(lowestValue);
-            }
-            else {
-                setHoodPos(toSet);
-            }
-        }
-        if(gamepad1.dpad_left && gamepad1.dpadLeftWasPressed()) {
-            double toSet = (hoodLeft.getPosition() + amountToMove);
-
-            if (toSet > highestValue) {
-                setHoodPos(highestValue);
-            }
-            else {
-                setHoodPos(toSet);
-            }
-        }
-    }
-
-    public double getVelocityError() {
-        double velocityError = targetSpeed - (primaryShooter.getVelocity());
-        return velocityError;
-    }
-
-    public void setHoodForClose() {
-        hoodLeft.setPosition(closeHood);
-    }
 
     public void toggleGate() {
         double initialState = gate.getPosition();
@@ -368,7 +284,7 @@ public class Shooter {
     }
 
     public double getHoodPos() {
-        return hoodLeft.getPosition();
+        return hood.getPosition();
     }
     public double getGatePos() {
         return gate.getPosition();

@@ -23,6 +23,7 @@ public class ShooterPIDTuner extends OpMode {
     PIDController shooterController = new PIDController(sP, sI, sD);
     private static double targetSpeed = 1100.0;
     private static double hoodPos = 0.25;
+    private static double currentVelForPanel = 0;
 
 
     private void runPID() {
@@ -36,7 +37,7 @@ public class ShooterPIDTuner extends OpMode {
     }
 
     private void setShooterPower(double value) {
-        //primaryShooter.setPower(value);
+        primaryShooter.setPower(value);
         secondaryShooter.setPower(value);
     }
 
@@ -61,7 +62,7 @@ public class ShooterPIDTuner extends OpMode {
         hood.setDirection(Servo.Direction.REVERSE);
         secondaryShooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        gate.setPosition(0.5);
+        gate.setPosition(hoodPos);
     }
     @Override
     public void start() {
@@ -75,6 +76,7 @@ public class ShooterPIDTuner extends OpMode {
 
         telemetryM.debug("target", targetSpeed);
         telemetryM.debug("velocity", primaryShooter.getVelocity());
+        currentVelForPanel = primaryShooter.getVelocity();
 
         telemetryM.update();
 

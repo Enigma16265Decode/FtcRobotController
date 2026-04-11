@@ -13,15 +13,16 @@ public class Turret {
     //private LimelightSS limelight;
     private Alliances alliance;
     private Servo turretLeft, turretRight;
-    private static double kP = 0.002, kI = 0.0, kD = 0.00007; //0.04 & 0.0015
-    public static double f = 0.025;
-    PIDController turretController = new PIDController(kP, kI, kD);
-    private double targetPos = 0.0;
-    private double ticksInDegree = (double) 1 / 330; //todo measure
+    private double targetPos = 0.0; //0.59/180
+    private double ticks = 0.574;
+    private double degrees = 180;
+    private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
+    private double turretZero = 0.485; //also 180
+    private double turretZeroOffset = ticks - turretZero;
     private boolean homeOverride = false;
     public Turret(HardwareMap hardwareMap, Kinematics kinematics, /*LimelightSS limelight,*/ Alliances alliance) {
         turretLeft = hardwareMap.get(Servo.class, "turretLeft");
-        turretRight = hardwareMap.get(Servo.class, "turretRight");
+        turretRight = hardwareMap.get(Servo.class, "turretRight"); //0.776 - 0.202 =
         turretRight.setDirection(Servo.Direction.REVERSE);
         //turretController.setTolerance(0.5);
 
@@ -69,7 +70,13 @@ public class Turret {
     }
 
     private void setTurretPosition(double position) {
-        final double offset = 0;
+        final double offset = 0.0;
+        if(position > 1) {
+            position = 1;
+        }
+        if(position < 0.18) {
+            position = 0.18;
+        }
         turretLeft.setPosition(position);
         turretRight.setPosition(position + offset);
     }
@@ -87,7 +94,7 @@ public class Turret {
     /** Sets the turret's target based on robot position relative to goal **/
     public void setTargetBasedOnHeadingToGoal() {
         if(!homeOverride) {
-            targetPos = (kinematics.getHeadingToGoal() * ticksInDegree);
+            targetPos = (kinematics.getHeadingToGoal() * ticksInDegree) - turretZeroOffset;
         }
     }
 }

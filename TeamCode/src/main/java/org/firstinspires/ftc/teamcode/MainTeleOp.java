@@ -9,6 +9,7 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.sun.tools.doclint.resources.doclint;
 
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -46,12 +47,7 @@ public class MainTeleOp extends OpMode {
     }
 
     public MainTeleOp(Alliances alliance) {
-        if(alliance == Alliances.RED) {
-            alliance = Alliances.RED;
-        }
-        else {
-            alliance = Alliances.BLUE;
-        }
+        this.alliance = alliance;
     }
 
 
@@ -76,19 +72,19 @@ public class MainTeleOp extends OpMode {
         double dy = goalPose().getY() - follower.getPose().getY();
         double goalHeadingRadians = Math.atan2(dy, dx);
 
-        /*
+
         telemetry.addData("Hood Pos: ", shooter.getHoodPos());
-        telemetry.addData("Shooter Power : ", shooter.getShooterPower());
         telemetry.addData("Shooter vel: ", shooter.getShooterVelocity());
         telemetry.addData("Shooting Range: ", shooter.getShootingRangeString());
         telemetry.addData("Gate Pos", shooter.getGatePos());
-        telemetry.addData("velocity error: ", shooter.getVelocityError());
         //telemetry.addData("presses: ", shooter.getPresses());
-
-         */
-        telemetry.addData("targetPos", turret.getTargetPos());
+        telemetry.addLine();
         telemetry.addData("turretPos", turret.getCurrentPos());
+        telemetry.addLine();
         telemetry.addData("deg readout", kinematics.getHeadingToGoal());
+        telemetry.addLine();
+        telemetry.addData("distance to goal", kinematics.getDistanceFromGoal());
+
 
         telemetry.update();
     }
@@ -100,16 +96,14 @@ public class MainTeleOp extends OpMode {
         //limelight.limelightController();
 
         drive.fieldCentricDrive();
-        drive.poseController(alliance);
-        //shooter.toggleShootingRange();
-        //shooter.hoodControl();
-        //shooter.shooterController();
-        //shooter.turretController();
+        drive.poseController();
+        shooter.toggleShootingRange();
+        shooter.shooterController();
+        shooter.turretController();
         //shooter.setRgbBasedOnDistance();
-        //shooter.shootControl();
         intake.intakeController();
-        turret.setTargetBasedOnHeadingToGoal();
-        turret.moveTurret();
+        //turret.setTargetBasedOnHeadingToGoal();
+        //turret.moveTurret();
 
         telemetry();
     }
@@ -136,9 +130,9 @@ public class MainTeleOp extends OpMode {
 
         //limelight = new LimelightSS(hardwareMap, alliance);
         intake = new Intake(hardwareMap, gamepad1);
-        drive = new Drive(hardwareMap, gamepad1, gamepad2, follower);
+        drive = new Drive(hardwareMap, gamepad1, gamepad2, follower, alliance);
         kinematics = new Kinematics(follower, goalPose());
         turret = new Turret(hardwareMap, kinematics, alliance);
-        //shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
+        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 }

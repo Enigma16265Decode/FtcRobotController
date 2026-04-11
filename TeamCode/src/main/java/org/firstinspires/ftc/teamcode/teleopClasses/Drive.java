@@ -15,10 +15,11 @@ public class Drive {
     private Gamepad gamepad2;
 
     private Follower follower;
+    private Alliances alliance;
 
     private DcMotor rightFront, rightRear, leftRear, leftFront;
 
-    public Drive(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Follower follower) {
+    public Drive(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Follower follower, Alliances alliance) {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -41,6 +42,7 @@ public class Drive {
         this.gamepad1 = gamepad1;
         this.gamepad2 = gamepad2;
         this.follower = follower;
+        this.alliance = alliance;
     }
 
     public void fieldCentricDrive() {
@@ -83,7 +85,7 @@ public class Drive {
         //telemetryM.debug("automatedDrive", automatedDrive);
     }
 
-    public void resetPose(Alliances alliance) {
+    public void resetPose() {
         if(alliance == Alliances.RED) {
             follower.setPose(new Pose(8, 8, Math.toRadians(0)));
         }
@@ -93,9 +95,9 @@ public class Drive {
         }
     }
 
-    public void poseController(Alliances alliance) {
+    public void poseController() {
         if(gamepad1.yWasPressed() || gamepad2.yWasPressed()) {
-            resetPose(alliance);
+            resetPose();
         }
     }
 
