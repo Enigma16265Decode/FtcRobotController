@@ -19,11 +19,18 @@ import static com.pedropathing.ivy.commands.Commands.*;
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.enums.IntakeModes;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
+import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
+import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
+import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
 //@Autonomous(name = "DautoClose", group = "Examples")
 public class DautoClose extends OpMode {
     private static Intake intake;
+    private static Kinematics kinematics;
+    private static Shooter shooter;
+    private static Turret turret;
     private Follower follower;
     private Alliances alliance;
 
@@ -33,7 +40,7 @@ public class DautoClose extends OpMode {
 
     private final Pose startPose = new Pose(25.5, 127.5, Math.toRadians(135)); // Start Pose of our robot.
     private final Pose scorePose = new Pose(48, 95.5, Math.toRadians(180));
-    private final Pose gatePose = new Pose(21, 71, Math.toRadians(180));
+    private final Pose gatePose = new Pose(20, 71, Math.toRadians(180));
     private final Pose pickup1Pose = new Pose(21.5, 81, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup1Control = new Pose(49.5, 81);
     private final Pose gateControl1 = new Pose(32, 75);
@@ -111,6 +118,42 @@ public class DautoClose extends OpMode {
                 .build();
     }
 
+    private Pose goalPose() {
+        if(alliance == Alliances.BLUE) {
+            return new Pose(11, 137);
+        }
+        else {
+            return new Pose(133, 137);
+        }
+    }
+
+    public static Command runShooterPID() {
+        return Command.build()
+                .setExecute(() -> {
+                   shooter.runShooterPID();
+                });
+    }
+
+    public static Command openGate() {
+        return Command.build()
+                .setStart(() -> {
+                   shooter.setGateOpen();
+                })
+                .setDone(() -> {
+                    return true;
+                });
+    }
+
+    public static Command closeGate() {
+        return Command.build()
+                .setStart(() -> {
+                    shooter.setGateClosed();
+                })
+                .setDone(() -> {
+                    return true;
+                });
+    }
+
     public static Command setIntakeMode(IntakeModes intakeMode) {
         return Command.build()
                 .setStart(() -> {
@@ -121,12 +164,38 @@ public class DautoClose extends OpMode {
                 });
     }
 
+    public static Command setHoodPos(double pos) {
+        return Command.build()
+                .setStart(() -> {
+                   shooter.setHoodPos(pos);
+                })
+                .setDone(() -> {
+                    return true;
+                });
+    }
+
+    public static Command setHoodPosForClose() {
+        return sequential(
+                setHoodPos(0.6)
+        );
+    }
+
     public static Command shootAndWait() {
         return sequential(
-                setIntakeMode(IntakeModes.OUTTAKE),
+                openGate(),
+                waitMs(700),
+                setIntakeMode(IntakeModes.INTAKE),
                 waitMs(600),
-                setIntakeMode(IntakeModes.IDLE)
+                setIntakeMode(IntakeModes.IDLE),
+                closeGate()
         );
+    }
+
+    public static Command runTurretController() {
+        return Command.build()
+                .setExecute(() -> {
+                    shooter.turretController();
+                });
     }
 
     public static Command runIntake() {
@@ -168,6 +237,9 @@ public class DautoClose extends OpMode {
 
     private void initSubsystems() {
         intake = new Intake(hardwareMap, gamepad1);
+        kinematics = new Kinematics(follower, goalPose());
+        turret = new Turret(hardwareMap, kinematics, alliance);
+        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
     }
 
     private void doMirroring() {
@@ -191,12 +263,15 @@ public class DautoClose extends OpMode {
     @Override
     public void init() {
         doMirroring();
-        initSubsystems();
 
         Scheduler.reset();
         follower = Constants.createFollower(hardwareMap);
+        initSubsystems();
+
         buildPaths();
         follower.setStartingPose(startPose);
+
+        shooter.setHoodPos(0.5);
     }
 
     @Override
@@ -206,6 +281,8 @@ public class DautoClose extends OpMode {
     public void start() {
         //schedule(setIntakeMode(IntakeModes.INTAKE));
         schedule(runIntake());
+        schedule(runShooterPID());
+        schedule(runTurretController());
         schedule(autoRoutine());
     }
 

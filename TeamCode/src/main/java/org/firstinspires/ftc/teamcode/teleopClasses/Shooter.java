@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.enums.IndicatorColors;
 import org.firstinspires.ftc.teamcode.enums.IntakeModes;
 
 import java.util.HashMap;
@@ -188,7 +187,6 @@ public class Shooter {
 
 
     public void shooterController() {
-        double currentVelocity = primaryShooter.getVelocity();
         setShooterVelocityBasedOnMode();
         setHoodPos(hoodPosBasedOnDistance());
 
@@ -212,10 +210,7 @@ public class Shooter {
             }
         }
         if(shootToggle) {
-            shooterController.setPID(sP, sI, sD);
-            double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
-
-            setShooterPower(shooterPid);
+            runShooterPID();
         }
         else {
             setShooterPower(0);
@@ -230,6 +225,15 @@ public class Shooter {
 
 
     }
+
+    public void runShooterPID() {
+        double currentVelocity = primaryShooter.getVelocity();
+
+        shooterController.setPID(sP, sI, sD);
+        double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
+
+        setShooterPower(shooterPid);
+    }
     public void turretController() {
         turret.setTargetBasedOnHeadingToGoal();
         turret.moveTurret();
@@ -238,7 +242,7 @@ public class Shooter {
 
 
 
-    private void setHoodPos(double value) {
+    public void setHoodPos(double value) {
         hood.setPosition(value);
     }
 
