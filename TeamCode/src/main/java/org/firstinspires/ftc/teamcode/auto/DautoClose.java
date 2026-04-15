@@ -38,19 +38,19 @@ public class DautoClose extends OpMode {
         this.alliance = alliance;
     }
 
-    private final Pose startPose = new Pose(25.5, 127.5, Math.toRadians(135)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(48, 95.5, Math.toRadians(180));
-    private final Pose gatePose = new Pose(20, 71, Math.toRadians(180));
-    private final Pose pickup1Pose = new Pose(21.5, 81, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose pickup1Control = new Pose(49.5, 81);
-    private final Pose gateControl1 = new Pose(32, 75);
-    private final Pose pickup2Pose = new Pose(18.5, 58, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
-    private final Pose pickup2Control = new Pose(56.5, 56);
-    private final Pose gateControl2 = new Pose(29.5, 72);
-    private final Pose pickup3Pose = new Pose(16.5, 34, Math.toRadians(180)); // Lowest (Third Set) of Artifacts from the Spike Mark.
-    private final Pose pickup3Control = new Pose(62, 31);
-    private final Pose gateControl3 = new Pose(32.5, 53.5);
-    private final Pose parkPose = new Pose(40, 75, Math.toRadians(180));
+    private Pose startPose = new Pose(27.5, 126, Math.toRadians(135)); // Start Pose of our robot.
+    private Pose scorePose = new Pose(54, 88, Math.toRadians(180));
+    private Pose gatePose = new Pose(20, 71, Math.toRadians(180));
+    private Pose pickup1Pose = new Pose(21.5, 81, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private Pose pickup1Control = new Pose(49.5, 81);
+    private Pose gateControl1 = new Pose(32, 75);
+    private Pose pickup2Pose = new Pose(18.5, 58, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
+    private Pose pickup2Control = new Pose(56.5, 56);
+    private Pose gateControl2 = new Pose(29.5, 72);
+    private Pose pickup3Pose = new Pose(16, 34, Math.toRadians(180)); // Lowest (Third Set) of Artifacts from the Spike Mark.
+    private Pose pickup3Control = new Pose(62, 31);
+    private Pose gateControl3 = new Pose(32.5, 53.5);
+    private Pose parkPose = new Pose(40, 75, Math.toRadians(180));
 
 
     //private Path scorePreload;
@@ -164,6 +164,23 @@ public class DautoClose extends OpMode {
                 });
     }
 
+    public static Command stopIntaking() {
+        return Command.build()
+                .setStart(() -> {
+                    intake.setIntakeMode(IntakeModes.IDLE);
+                })
+                .setDone(() -> {
+                    return true;
+                });
+    }
+
+    public static Command stopIntakingResidual() {
+        return sequential(
+                waitMs(200),
+                stopIntaking()
+        );
+    }
+
     public static Command setHoodPos(double pos) {
         return Command.build()
                 .setStart(() -> {
@@ -176,7 +193,7 @@ public class DautoClose extends OpMode {
 
     public static Command setHoodPosForClose() {
         return sequential(
-                setHoodPos(0.6)
+                setHoodPos(0.5)
         );
     }
 
@@ -213,22 +230,22 @@ public class DautoClose extends OpMode {
 
                 setIntakeMode(IntakeModes.INTAKE),
                 follow(follower, grabPickup1),
-                setIntakeMode(IntakeModes.IDLE),
-                follow(follower, openGate1, true),
+                stopIntakingResidual(),
+                follow(follower, openGate1),
                 follow(follower, scorePickup1, true),
                 shootAndWait(),
 
                 setIntakeMode(IntakeModes.INTAKE),
                 follow(follower, grabPickup2),
-                setIntakeMode(IntakeModes.IDLE),
-                follow(follower, openGate2, true),
+                stopIntakingResidual(),
+                follow(follower, openGate2),
                 follow(follower, scorePickup2, true),
                 shootAndWait(),
 
                 setIntakeMode(IntakeModes.INTAKE),
                 follow(follower, grabPickup3),
-                setIntakeMode(IntakeModes.IDLE),
-                follow(follower, openGate3, true),
+                stopIntakingResidual(),
+                follow(follower, openGate3),
                 follow(follower, scorePickup3, true),
                 shootAndWait(),
                 follow(follower, park)
@@ -244,19 +261,19 @@ public class DautoClose extends OpMode {
 
     private void doMirroring() {
         if(alliance == Alliances.RED) {
-            startPose.mirror();
-            scorePose.mirror();
-            gatePose.mirror();
-            pickup1Pose.mirror();
-            pickup1Control.mirror();
-            gateControl1.mirror();
-            pickup2Pose.mirror();
-            pickup2Control.mirror();
-            gateControl2.mirror();
-            pickup3Pose.mirror();
-            pickup3Control.mirror();
-            gateControl3.mirror();
-            parkPose.mirror();
+            startPose = startPose.mirror();
+            scorePose = scorePose.mirror();
+            gatePose = gatePose.mirror();
+            pickup1Pose = pickup1Pose.mirror();
+            pickup1Control = pickup1Control.mirror();
+            gateControl1 = gateControl1.mirror();
+            pickup2Pose = pickup2Pose.mirror();
+            pickup2Control = pickup2Control.mirror();
+            gateControl2 = gateControl2.mirror();
+            pickup3Pose = pickup3Pose.mirror();
+            pickup3Control = pickup3Control.mirror();
+            gateControl3 = gateControl3.mirror();
+            parkPose = parkPose.mirror();
         }
     }
 
@@ -270,8 +287,6 @@ public class DautoClose extends OpMode {
 
         buildPaths();
         follower.setStartingPose(startPose);
-
-        shooter.setHoodPos(0.5);
     }
 
     @Override
@@ -280,6 +295,7 @@ public class DautoClose extends OpMode {
     @Override
     public void start() {
         //schedule(setIntakeMode(IntakeModes.INTAKE));
+        schedule(setHoodPosForClose());
         schedule(runIntake());
         schedule(runShooterPID());
         schedule(runTurretController());

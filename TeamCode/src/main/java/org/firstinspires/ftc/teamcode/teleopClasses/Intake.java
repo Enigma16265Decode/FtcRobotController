@@ -13,7 +13,6 @@ public class Intake { //This also does transfer
     private Servo intakeLift;
     private Gamepad gamepad1;
     private HardwareMap hardwareMap;
-    private Shooter shooter;
     private IntakeModes intakeMode;
 
     public Intake(HardwareMap hardwareMap, Gamepad gamepad1) {
@@ -27,11 +26,6 @@ public class Intake { //This also does transfer
         this.hardwareMap = hardwareMap;
     }
 
-    public void setIntakePower(double toSet) {
-        frontIntake.setPower(toSet);
-        backIntake.setPower(toSet/2);
-    }
-
     public void setIntakeMode(IntakeModes intakeMode) {
         this.intakeMode = intakeMode;
     }
@@ -39,7 +33,7 @@ public class Intake { //This also does transfer
     public void runIntake() {
         if(intakeMode == IntakeModes.INTAKE) {
             frontIntake.setPower(1);
-            backIntake.setPower(0.7);
+            backIntake.setPower(1);
         }
         if (intakeMode == IntakeModes.OUTTAKE) {
             frontIntake.setPower(-0.8);
@@ -47,7 +41,7 @@ public class Intake { //This also does transfer
         }
         if(intakeMode == IntakeModes.SHOOT) {
             frontIntake.setPower(1);
-            backIntake.setPower(1);
+            backIntake.setPower(0.5);
         }
         if(intakeMode == IntakeModes.IDLE) {
             frontIntake.setPower(0);

@@ -30,6 +30,10 @@ public class ServoTunerBasic extends OpMode {
             turretRight.setPosition(0.5);
             turretLeft.setPosition(0.5);
         }
+        if(gamepad1.xWasPressed()) {
+            turretRight.setPosition(0.75);
+            turretLeft.setPosition(0.75);
+        }
         if(gamepad1.yWasPressed()) {
             turretRight.setPosition(1);
             turretLeft.setPosition(1);

@@ -33,17 +33,16 @@ public class Shooter {
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
     public static int targetSpeed = 1200;
     public double gateClosed = 0.3;
-    public double gateOpen = 0.8;
+    public double gateOpen = 0.7;
     private boolean shootToggle = false;
     private boolean gateToggle = false;
-    private boolean shooterStopped = false;
     private int shootingState = -1;
     private PIDController shooterController;
     private DcMotorEx primaryShooter;
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private double[] closeHoodPoses = {0.4, 0.5, 0.6, 0.8, 0.8};
+    private double[] closeHoodPoses = {0.4, 0.48, 0.57, 0.75, 0.81};
     private double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();
 

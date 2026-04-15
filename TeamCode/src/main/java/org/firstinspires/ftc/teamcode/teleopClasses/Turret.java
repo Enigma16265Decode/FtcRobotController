@@ -17,7 +17,7 @@ public class Turret {
     private double ticks = 0.574;
     private double degrees = 180;
     private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
-    private double turretZero = 0.485; //also 180
+    private double turretZero = 0.495; //also 180
     private double turretZeroOffset = ticks - turretZero;
     private boolean homeOverride = false;
     public Turret(HardwareMap hardwareMap, Kinematics kinematics, /*LimelightSS limelight,*/ Alliances alliance) {
