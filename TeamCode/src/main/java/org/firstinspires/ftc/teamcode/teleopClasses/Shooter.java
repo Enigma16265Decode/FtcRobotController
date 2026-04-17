@@ -42,7 +42,7 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private int[] closeShooterVelocities = {1150, 1180, 1220, 1250, 1300};
+    private int[] closeShooterVelocities = {1100, 1130, 1200, 1250, 1300};
     private double[] closeHoodPoses = {0.4, 0.48, 0.58, 0.75, 0.81};
     private double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();
@@ -67,7 +67,7 @@ public class Shooter {
         this.intake = intake;
         this.kinematics = kinematics;
 
-        setHoodPos(0.5);
+        setHoodPos(0.76);
     }
 
 
