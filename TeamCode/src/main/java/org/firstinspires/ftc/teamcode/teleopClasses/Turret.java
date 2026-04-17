@@ -14,15 +14,15 @@ public class Turret {
     private Alliances alliance;
     private Servo turretLeft, turretRight;
     private double targetPos = 0.0; //0.59/180
-    private double ticks = 0.574;
+    private double ticks = 0.56;
     private double degrees = 180;
     private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
-    private double turretZero = 0.495; //also 180
+    private double turretZero = 0.49; //also 180
     private double turretZeroOffset = ticks - turretZero;
     private boolean homeOverride = false;
     public Turret(HardwareMap hardwareMap, Kinematics kinematics, /*LimelightSS limelight,*/ Alliances alliance) {
         turretLeft = hardwareMap.get(Servo.class, "turretLeft");
-        turretRight = hardwareMap.get(Servo.class, "turretRight"); //0.776 - 0.202 =
+        turretRight = hardwareMap.get(Servo.class, "turretRight"); //0.782 0.222
         turretRight.setDirection(Servo.Direction.REVERSE);
         //turretController.setTolerance(0.5);
 
@@ -70,7 +70,7 @@ public class Turret {
     }
 
     private void setTurretPosition(double position) {
-        final double offset = 0.0;
+        final double offset = -0.03;
         if(position > 1) {
             position = 1;
         }

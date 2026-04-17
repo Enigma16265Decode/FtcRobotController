@@ -42,7 +42,8 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private double[] closeHoodPoses = {0.4, 0.48, 0.57, 0.75, 0.81};
+    private int[] closeShooterVelocities = {1150, 1180, 1220, 1250, 1300};
+    private double[] closeHoodPoses = {0.4, 0.48, 0.58, 0.75, 0.81};
     private double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();
 
@@ -65,6 +66,8 @@ public class Shooter {
         this.turret = turret;
         this.intake = intake;
         this.kinematics = kinematics;
+
+        setHoodPos(0.5);
     }
 
 
@@ -173,7 +176,7 @@ public class Shooter {
 
     private void setShooterVelocityBasedOnMode() {
         if(shootingRange == ShootingRanges.CLOSE) {
-            targetSpeed = closeSpeed;
+            targetSpeed = closeShooterVelocities[getDistanceIndex()];
         }
         else {
             targetSpeed = farSpeed;
@@ -187,7 +190,7 @@ public class Shooter {
 
     public void shooterController() {
         setShooterVelocityBasedOnMode();
-        setHoodPos(hoodPosBasedOnDistance());
+        //setHoodPos(hoodPosBasedOnDistance());
 
 
         if(gamepad1.bWasPressed()) {
@@ -231,6 +234,9 @@ public class Shooter {
         shooterController.setPID(sP, sI, sD);
         double shooterPid = shooterController.calculate(currentVelocity, targetSpeed);
 
+        if(shooterPid < -0.2 && shootingRange == ShootingRanges.CLOSE) {
+            shooterPid = -0.2;
+        }
         setShooterPower(shooterPid);
     }
     public void turretController() {

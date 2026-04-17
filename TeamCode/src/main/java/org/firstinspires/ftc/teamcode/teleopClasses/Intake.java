@@ -22,6 +22,8 @@ public class Intake { //This also does transfer
         frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeLift.setDirection(Servo.Direction.REVERSE);
 
+        frontIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         this.gamepad1 = gamepad1;
         this.hardwareMap = hardwareMap;
     }
