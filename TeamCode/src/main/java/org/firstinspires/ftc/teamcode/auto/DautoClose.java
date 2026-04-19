@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
 import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
+import org.firstinspires.ftc.teamcode.teleopClasses.LimelightSS;
 import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
@@ -31,6 +32,7 @@ public class DautoClose extends OpMode {
     private static Kinematics kinematics;
     private static Shooter shooter;
     private static Turret turret;
+    private static LimelightSS limelight;
     private Follower follower;
     private Alliances alliance;
 
@@ -255,8 +257,8 @@ public class DautoClose extends OpMode {
     private void initSubsystems() {
         intake = new Intake(hardwareMap, gamepad1);
         kinematics = new Kinematics(follower, goalPose());
-        turret = new Turret(hardwareMap, kinematics, alliance);
-        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
+        turret = new Turret(hardwareMap, kinematics, limelight, alliance);
+        shooter = new Shooter(hardwareMap, gamepad1, gamepad2, turret, intake, kinematics);
     }
 
     private void doMirroring() {

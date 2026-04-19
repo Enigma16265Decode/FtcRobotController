@@ -6,13 +6,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "! servo tuner basic")
 public class ServoTunerBasic extends OpMode {
-    private Servo turretRight, turretLeft;
+    private Servo turretRight, turretLeft, hood;
 
     @Override
     public void init() {
         turretLeft = hardwareMap.get(Servo.class, "turretLeft");
         turretRight = hardwareMap.get(Servo.class, "turretRight");
         turretRight.setDirection(Servo.Direction.REVERSE);
+
+        hood = hardwareMap.get(Servo.class, "hood");
     }
 
     @Override
@@ -21,8 +23,9 @@ public class ServoTunerBasic extends OpMode {
     }
 
     public void setTurretPos(double pos) {
-        turretRight.setPosition(pos);
-        turretLeft.setPosition(pos);
+        //turretRight.setPosition(pos);
+        //turretLeft.setPosition(pos);
+        hood.setPosition(pos);
     }
 
     @Override

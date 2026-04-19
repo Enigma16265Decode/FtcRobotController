@@ -17,14 +17,14 @@ import java.util.List;
 public class LimelightTest extends OpMode {
     LimelightStates limelightState;
     private Limelight3A limelight;
-    CRServo servo;
+    //CRServo servo;
     private double px;
 
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        servo = hardwareMap.get(CRServo.class, "servo");
-        servo.setDirection(CRServo.Direction.REVERSE);
+        //servo = hardwareMap.get(CRServo.class, "servo");
+        //servo.setDirection(CRServo.Direction.REVERSE);
 
         telemetry.setMsTransmissionInterval(11);
 
@@ -117,14 +117,14 @@ public class LimelightTest extends OpMode {
         if (result.isValid()) {
             if (limelightState == LimelightStates.OFF_LEFT) {
                 //servo.setPosition(servo.getPosition() + amountToMove);
-                servo.setPower(-0.05);
+                //servo.setPower(-0.05);
             }
             if (limelightState == LimelightStates.OFF_RIGHT) {
                 //servo.setPosition(servo.getPosition() - amountToMove);
-                servo.setPower(0.05);
+                //servo.setPower(0.05);
             }
             if (limelightState == LimelightStates.CENTERED || limelightState == LimelightStates.LOST) {
-                servo.setPower(0);
+                //servo.setPower(0);
             }
 
 
@@ -133,7 +133,7 @@ public class LimelightTest extends OpMode {
             telemetry.addData("off", limelightState);
         }
         else {
-            servo.setPower(0);
+            //servo.setPower(0);
         }
     }
 
@@ -141,14 +141,14 @@ public class LimelightTest extends OpMode {
         if (result.isValid()) {
             if (limelightState == LimelightStates.OFF_LEFT) {
                 //servo.setPosition(servo.getPosition() + amountToMove);
-                servo.setPower(-0.06);
+                //servo.setPower(-0.06);
             }
             if (limelightState == LimelightStates.OFF_RIGHT) {
                 //servo.setPosition(servo.getPosition() - amountToMove);
-                servo.setPower(0.06);
+                //servo.setPower(0.06);
             }
             if (limelightState == LimelightStates.CENTERED || limelightState == LimelightStates.LOST) {
-                servo.setPower(0);
+                //servo.setPower(0);
             }
 
 
@@ -158,7 +158,7 @@ public class LimelightTest extends OpMode {
             telemetry.addData("name", result.getClass().getName());
         }
         else {
-            servo.setPower(0);
+            //servo.setPower(0);
         }
     }
 

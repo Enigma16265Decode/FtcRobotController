@@ -24,7 +24,7 @@ enum ShootingRanges {
 public class Shooter {
     private int closeSpeed = 1200, farSpeed = 1450;
     ShootingRanges shootingRange = ShootingRanges.CLOSE;
-    private final Gamepad gamepad1;
+    private final Gamepad gamepad1, gamepad2;
     private final HardwareMap hardwareMap;
     private Turret turret;
     private Intake intake;
@@ -42,12 +42,12 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private int[] closeShooterVelocities = {1100, 1130, 1200, 1250, 1300};
-    private double[] closeHoodPoses = {0.4, 0.48, 0.58, 0.75, 0.81};
+    private int[] closeShooterVelocities = {1100, 1130, 1160, 1220, 1300}; //y=3.16667x+928.33333
+    private double[] closeHoodPoses = {0.58, 0.66, 0.72, 0.83, 0.85}; //y=0.00675x+0.225
     private double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();
 
-    public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Turret turret, Intake intake, Kinematics kinematics) {
+    public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Turret turret, Intake intake, Kinematics kinematics) {
         shooterController = new PIDController(sP, sI, sD);
 
         primaryShooter = hardwareMap.get(DcMotorEx.class, "leftShooter"); //change depending on side
@@ -62,6 +62,7 @@ public class Shooter {
         initializeMaps();
 
         this.gamepad1 = gamepad1;
+        this.gamepad2 = gamepad2;
         this.hardwareMap = hardwareMap;
         this.turret = turret;
         this.intake = intake;
@@ -174,9 +175,10 @@ public class Shooter {
         return 4;
     }
 
-    private void setShooterVelocityBasedOnMode() {
+    private void setShooterPosBasedOnMode() {
         if(shootingRange == ShootingRanges.CLOSE) {
             targetSpeed = closeShooterVelocities[getDistanceIndex()];
+            setHoodPos(closeHoodPoses[getDistanceIndex()]);
         }
         else {
             targetSpeed = farSpeed;
@@ -189,7 +191,7 @@ public class Shooter {
 
 
     public void shooterController() {
-        setShooterVelocityBasedOnMode();
+        setShooterPosBasedOnMode();
         //setHoodPos(hoodPosBasedOnDistance());
 
 
@@ -240,8 +242,8 @@ public class Shooter {
         setShooterPower(shooterPid);
     }
     public void turretController() {
-        turret.setTargetBasedOnHeadingToGoal();
         turret.moveTurret();
+        turret.offsetController(gamepad2);
     }
 
 

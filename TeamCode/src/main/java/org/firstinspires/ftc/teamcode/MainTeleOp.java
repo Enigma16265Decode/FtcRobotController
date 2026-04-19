@@ -84,6 +84,12 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("deg readout", kinematics.getHeadingToGoal());
         telemetry.addLine();
         telemetry.addData("distance to goal", kinematics.getDistanceFromGoal());
+        telemetry.addLine();
+        telemetry.addData("LIMELIGHT STATE", turret.getLimelightState());
+        telemetry.addLine();
+        telemetry.addData("Limelight Targeted ID", limelight.getTargetedID());
+        telemetry.addLine();
+        telemetry.addData("Limelight offset", turret.getLimelightOffset());
 
 
         telemetry.update();
@@ -116,7 +122,7 @@ public class MainTeleOp extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive();
-        //shooter.initHood();
+        limelight.startLimelight();
     }
 
     @Override
@@ -128,11 +134,11 @@ public class MainTeleOp extends OpMode {
     public void init() {
         initialize();
 
-        //limelight = new LimelightSS(hardwareMap, alliance);
+        limelight = new LimelightSS(hardwareMap, alliance);
         intake = new Intake(hardwareMap, gamepad1);
         drive = new Drive(hardwareMap, gamepad1, gamepad2, follower, alliance);
         kinematics = new Kinematics(follower, goalPose());
-        turret = new Turret(hardwareMap, kinematics, alliance);
-        shooter = new Shooter(hardwareMap, gamepad1, turret, intake, kinematics);
+        turret = new Turret(hardwareMap, kinematics, limelight, alliance);
+        shooter = new Shooter(hardwareMap, gamepad1, gamepad2, turret, intake, kinematics);
     }
 }
