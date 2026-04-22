@@ -40,8 +40,8 @@ public class Kinematics { //this does a lot of the calculations/logic
 
     public double getHeadingToGoal() {
         Pose effectiveGoalPose = new Pose(
-                goalPose.getX() /*+ follower.getVelocity().getXComponent()*/,
-                goalPose.getY() /*+ follower.getVelocity().getYComponent()*/);
+                goalPose.getX() - follower.getVelocity().getXComponent(),
+                goalPose.getY() - follower.getVelocity().getYComponent());
         double dx = effectiveGoalPose.getX() - follower.getPose().getX();
         double dy = effectiveGoalPose.getY() - follower.getPose().getY();
         double goalHeadingRadians = Math.atan2(dy, dx);

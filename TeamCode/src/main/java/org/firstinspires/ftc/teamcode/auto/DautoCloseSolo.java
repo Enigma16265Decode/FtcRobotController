@@ -7,9 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.pedro.PedroCommands.*;
@@ -19,7 +17,6 @@ import static com.pedropathing.ivy.commands.Commands.*;
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.enums.IntakeModes;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
 import org.firstinspires.ftc.teamcode.teleopClasses.Intake;
 import org.firstinspires.ftc.teamcode.teleopClasses.Kinematics;
 import org.firstinspires.ftc.teamcode.teleopClasses.LimelightSS;
@@ -27,7 +24,7 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
 //@Autonomous(name = "DautoClose", group = "Examples")
-public class DautoClose extends OpMode {
+public class DautoCloseSolo extends OpMode {
     private static Intake intake;
     private static Kinematics kinematics;
     private static Shooter shooter;
@@ -36,27 +33,28 @@ public class DautoClose extends OpMode {
     private Follower follower;
     private Alliances alliance;
 
-    public DautoClose(Alliances alliance) {
+    public DautoCloseSolo(Alliances alliance) {
         this.alliance = alliance;
     }
 
     private Pose startPose = new Pose(27.5, 126, Math.toRadians(135)); // Start Pose of our robot.
     private Pose scorePose = new Pose(54, 88, Math.toRadians(180));
-    private Pose gatePose = new Pose(20, 71, Math.toRadians(180));
+    private Pose gatePose = new Pose(22.5, 71, Math.toRadians(180));
     private Pose pickup1Pose = new Pose(21.5, 81, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
     private Pose pickup1Control = new Pose(49.5, 81);
     private Pose gateControl1 = new Pose(32, 75);
     private Pose pickup2Pose = new Pose(18.5, 58, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
     private Pose pickup2Control = new Pose(56.5, 56);
     private Pose gateControl2 = new Pose(29.5, 72);
-    private Pose pickup3Pose = new Pose(16, 34, Math.toRadians(180)); // Lowest (Third Set) of Artifacts from the Spike Mark.
-    private Pose pickup3Control = new Pose(62, 31);
+    private Pose pickup3Pose = new Pose(16, 32, Math.toRadians(180)); // Lowest (Third Set) of Artifacts from the Spike Mark.
+    private Pose pickup3Control = new Pose(64, 26);
     private Pose gateControl3 = new Pose(32.5, 53.5);
+    private Pose gateIntake = new Pose(11, 56.5, Math.toRadians(135));
     private Pose parkPose = new Pose(40, 75, Math.toRadians(180));
 
 
     //private Path scorePreload;
-    private PathChain scorePreload, grabPickup1, openGate1, scorePickup1, grabPickup2, openGate2, scorePickup2, grabPickup3, openGate3, scorePickup3, park;
+    private PathChain scorePreload, grabPickup1, openGate1, scorePickup1, grabPickup2, openGate2, scorePickup2, grabPickup3, openGate3, scorePickup3, openGate4, gateIntake1, scoreGate1, park;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
@@ -112,6 +110,21 @@ public class DautoClose extends OpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(pickup3Pose, scorePose))
                 .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .build();
+
+        openGate4 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, gatePose))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), gatePose.getHeading())
+                .build();
+
+        gateIntake1 = follower.pathBuilder()
+                .addPath(new BezierLine(gatePose, gateIntake))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), gateIntake.getHeading())
+                .build();
+
+        scoreGate1 = follower.pathBuilder()
+                .addPath(new BezierLine(gateIntake, scorePose))
+                .setLinearHeadingInterpolation(gateIntake.getHeading(), scorePose.getHeading())
                 .build();
 
         park = follower.pathBuilder()
@@ -195,7 +208,7 @@ public class DautoClose extends OpMode {
 
     public static Command setHoodPosForClose() {
         return sequential(
-                setHoodPos(0.5)
+                setHoodPos(0.68)
         );
     }
 
@@ -203,7 +216,7 @@ public class DautoClose extends OpMode {
         return sequential(
                 openGate(),
                 waitMs(700),
-                setIntakeMode(IntakeModes.INTAKE),
+                setIntakeMode(IntakeModes.SHOOT),
                 waitMs(600),
                 setIntakeMode(IntakeModes.IDLE),
                 closeGate()
@@ -250,17 +263,26 @@ public class DautoClose extends OpMode {
                 follow(follower, openGate3),
                 follow(follower, scorePickup3, true),
                 shootAndWait(),
-                follow(follower, park)
+                //follow(follower, openGate4),
+                setIntakeMode(IntakeModes.INTAKE),
+                follow(follower, gateIntake1, true),
+                waitMs(300),
+                stopIntakingResidual(),
+                follow(follower, scoreGate1),
+                shootAndWait()
+                //follow(follower, park)
         );
     }
 
     private void initSubsystems() {
+        limelight = new LimelightSS(hardwareMap, alliance);
         intake = new Intake(hardwareMap, gamepad1);
         kinematics = new Kinematics(follower, goalPose());
         turret = new Turret(hardwareMap, kinematics, limelight, alliance);
         shooter = new Shooter(hardwareMap, gamepad1, gamepad2, turret, intake, kinematics);
     }
 
+    //todo make sure is updated :thumbsup:
     private void doMirroring() {
         if(alliance == Alliances.RED) {
             startPose = startPose.mirror();

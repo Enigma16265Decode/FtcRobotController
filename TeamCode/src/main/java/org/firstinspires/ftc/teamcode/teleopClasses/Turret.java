@@ -20,7 +20,7 @@ public class Turret {
     private double degrees = 180;
     private double turretOffset = 0, limelightOffset = 0;
     private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
-    private double turretZero = 0.5; //also 180
+    private double turretZero = 0.495; //also 180
     private double turretZeroOffset = ticks - turretZero;
     private boolean homeOverride = false;
     public Turret(HardwareMap hardwareMap, Kinematics kinematics, LimelightSS limelight, Alliances alliance) {
@@ -61,11 +61,13 @@ public class Turret {
             setTargetBasedOnHeadingToGoal();
         }
 
-         */
 
-        if(limelight.getTx() > -9 && limelight.getTx() < 9) {
+
+        if(limelight.getTx() > -4 && limelight.getTx() < 4) {
             limelightOffset = limelight.getTx() * ticksInDegree * -1;
         }
+
+         */
 
 
         setTargetBasedOnHeadingToGoal();
@@ -130,6 +132,10 @@ public class Turret {
 
     public double getCurrentPos() {
         return turretLeft.getPosition();
+    }
+
+    public double getTurretOffset() {
+        return turretOffset;
     }
 
     public double getTargetPos() {

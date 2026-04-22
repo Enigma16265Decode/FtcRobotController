@@ -80,9 +80,7 @@ public class MainTeleOp extends OpMode {
         //telemetry.addData("presses: ", shooter.getPresses());
         telemetry.addLine();
         telemetry.addData("turretPos", turret.getCurrentPos());
-        telemetry.addLine();
         telemetry.addData("deg readout", kinematics.getHeadingToGoal());
-        telemetry.addLine();
         telemetry.addData("distance to goal", kinematics.getDistanceFromGoal());
         telemetry.addLine();
         telemetry.addData("LIMELIGHT STATE", turret.getLimelightState());
@@ -90,6 +88,7 @@ public class MainTeleOp extends OpMode {
         telemetry.addData("Limelight Targeted ID", limelight.getTargetedID());
         telemetry.addLine();
         telemetry.addData("Limelight offset", turret.getLimelightOffset());
+        telemetry.addData("Human offset", turret.getTurretOffset());
 
 
         telemetry.update();

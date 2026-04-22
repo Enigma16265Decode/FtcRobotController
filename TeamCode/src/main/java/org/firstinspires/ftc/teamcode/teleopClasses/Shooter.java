@@ -22,7 +22,7 @@ enum ShootingRanges {
     FAR
 }
 public class Shooter {
-    private int closeSpeed = 1200, farSpeed = 1450;
+    private final int farSpeed = 1540;
     ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1, gamepad2;
     private final HardwareMap hardwareMap;
@@ -31,9 +31,9 @@ public class Shooter {
     private Kinematics kinematics;
     private Timer shootTimer;
     public static double sP = 0.02, sI = 0/*.35 /*0.72 */, sD = 0; //sP was 0.018, and sI was 0.35
-    public static int targetSpeed = 1200;
-    public double gateClosed = 0.3;
-    public double gateOpen = 0.7;
+    public static int targetSpeed = 1120;
+    public final double gateClosed = 0.3;
+    public final double gateOpen = 0.7;
     private boolean shootToggle = false;
     private boolean gateToggle = false;
     private int shootingState = -1;
@@ -42,9 +42,9 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private int[] closeShooterVelocities = {1100, 1130, 1160, 1220, 1300}; //y=3.16667x+928.33333
-    private double[] closeHoodPoses = {0.58, 0.66, 0.72, 0.83, 0.85}; //y=0.00675x+0.225
-    private double[] closeDistances = {52, 64, 76, 88};
+    private final int[] closeShooterVelocities = {1100, 1130, 1160, 1220, 1300}; //y=3.16667x+928.33333
+    private final double[] closeHoodPoses = {0.58, 0.66, 0.8, 0.85, 0.88}; //y=0.00675x+0.225
+    private final double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();
 
     public Shooter(@NonNull HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2, Turret turret, Intake intake, Kinematics kinematics) {
@@ -129,12 +129,7 @@ public class Shooter {
         double max = ideal + off;
         double min = ideal - off;
 
-        if(x < max && x > min) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return x < max && x > min;
     }
 
     public void setShooterPower(double value) {

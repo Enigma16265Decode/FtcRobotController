@@ -49,7 +49,7 @@ public class Intake { //This also does transfer
             frontIntake.setPower(0);
             backIntake.setPower(0);
         }
-        intakeLift.setPosition(0.65);
+        intakeLift.setPosition(0.67);
     }
 
     /** Runs the intake based on gamepad input **/
