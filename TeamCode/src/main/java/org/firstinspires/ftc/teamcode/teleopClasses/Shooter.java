@@ -42,8 +42,8 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private final int[] closeShooterVelocities = {1100, 1130, 1160, 1220, 1300}; //y=3.16667x+928.33333
-    private final double[] closeHoodPoses = {0.58, 0.66, 0.8, 0.85, 0.88}; //y=0.00675x+0.225
+    private final int[] closeShooterVelocities = {1080, 1080, 1120, 1160, 1240}; //y=3.16667x+928.33333
+    private final double[] closeHoodPoses = {0.66, 0.8, 0.881, 0.882, 0.883}; //y=0.00675x+0.225
     private final double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();
 
@@ -69,6 +69,10 @@ public class Shooter {
         this.kinematics = kinematics;
 
         setHoodPos(0.76);
+    }
+
+    public int getTargetSpeed() {
+        return targetSpeed;
     }
 
 
@@ -108,7 +112,7 @@ public class Shooter {
                 break;
             case 1:
                 if(shootTimer.getElapsedTime() >= 300) {
-                    intake.setIntakeMode(IntakeModes.SHOOT);
+                    intake.setIntakeMode(IntakeModes.SHOOT_CLOSE);
                     shootTimer.resetTimer();
                     shootingState = 2;
                 }
@@ -198,6 +202,17 @@ public class Shooter {
             else {
                 gateToggle = true;
             }
+        }
+        if(gamepad1.x) {
+            if(shootingRange == ShootingRanges.CLOSE) {
+                intake.setIntakeMode(IntakeModes.SHOOT_CLOSE);
+            }
+            else {
+                intake.setIntakeMode(IntakeModes.SHOOT_FAR);
+            }
+        }
+        if(gamepad1.xWasReleased()) {
+            gateToggle = false;
         }
         if(gamepad1.right_bumper && gamepad1.rightBumperWasPressed()) {
             boolean stateBeforeToggle = shootToggle;

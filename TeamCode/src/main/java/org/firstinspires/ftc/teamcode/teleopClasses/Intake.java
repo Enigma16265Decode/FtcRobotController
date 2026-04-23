@@ -41,7 +41,11 @@ public class Intake { //This also does transfer
             frontIntake.setPower(-0.8);
             backIntake.setPower(-0.5);
         }
-        if(intakeMode == IntakeModes.SHOOT) {
+        if(intakeMode == IntakeModes.SHOOT_CLOSE) {
+            frontIntake.setPower(1);
+            backIntake.setPower(0.7);
+        }
+        if(intakeMode == IntakeModes.SHOOT_FAR) {
             frontIntake.setPower(1);
             backIntake.setPower(0.5);
         }
@@ -54,10 +58,7 @@ public class Intake { //This also does transfer
 
     /** Runs the intake based on gamepad input **/
     public void intakeController() {
-        if(gamepad1.x) {
-            intakeMode = IntakeModes.SHOOT;
-        }
-        else {
+        if(!gamepad1.x) {
             if(gamepad1.right_trigger > 0.4) {
                 setIntakeMode(IntakeModes.INTAKE);
             }

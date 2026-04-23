@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 
-@Autonomous(name = "Allen C. Bungalow (Alliance Close Blue)")
-public class CloseRed extends DautoClose {
-    public CloseRed() {
+@Autonomous(name = "Sharon C. Robinson (Solo Close Red)")
+public class CloseSoloRed extends DautoCloseSolo {
+    public CloseSoloRed() {
         super(Alliances.RED);
     }
 }

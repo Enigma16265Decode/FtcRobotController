@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.sun.tools.doclint.resources.doclint;
 
+import org.firstinspires.ftc.teamcode.auto.DautoClose;
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleopClasses.Drive;
@@ -35,6 +36,7 @@ public class MainTeleOp extends OpMode {
     private Follower follower;
     private Alliances alliance;
     private static final Pose startingPose = new Pose(105,72, Math.toRadians(0));
+    //private static Pose startingPose = DautoClose.getParkPose() //todo just add this to constructor
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
     public Pose goalPose() {
@@ -89,6 +91,8 @@ public class MainTeleOp extends OpMode {
         telemetry.addLine();
         telemetry.addData("Limelight offset", turret.getLimelightOffset());
         telemetry.addData("Human offset", turret.getTurretOffset());
+        telemetry.addLine();
+        telemetry.addData("target velocity", shooter.getTargetSpeed());
 
 
         telemetry.update();
@@ -105,17 +109,14 @@ public class MainTeleOp extends OpMode {
         shooter.toggleShootingRange();
         shooter.shooterController();
         shooter.turretController();
-        //shooter.setRgbBasedOnDistance();
         intake.intakeController();
-        //turret.setTargetBasedOnHeadingToGoal();
-        //turret.moveTurret();
 
         telemetry();
     }
 
     @Override
     public void init_loop() {
-        //telemetry.addData("Current Turret Pos:",turret.getCurrentPos());
+
     }
 
     @Override

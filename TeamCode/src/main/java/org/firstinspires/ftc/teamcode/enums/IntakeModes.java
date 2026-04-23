@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.enums;
 public enum IntakeModes {
     INTAKE,
     OUTTAKE,
-    SHOOT,
+    SHOOT_CLOSE,
+    SHOOT_FAR,
     IDLE
 }

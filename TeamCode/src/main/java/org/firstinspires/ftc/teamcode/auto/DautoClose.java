@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.auto; // make sure this aligns with class location
 
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.waitMs;
+import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -8,11 +13,6 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
-import static com.pedropathing.ivy.Scheduler.schedule;
-import static com.pedropathing.ivy.pedro.PedroCommands.*;
-import static com.pedropathing.ivy.groups.Groups.*;
-import static com.pedropathing.ivy.commands.Commands.*;
 
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.enums.IntakeModes;
@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.teleopClasses.Shooter;
 import org.firstinspires.ftc.teamcode.teleopClasses.Turret;
 
 //@Autonomous(name = "DautoClose", group = "Examples")
-public class DautoCloseSolo extends OpMode {
+public class DautoClose extends OpMode {
     private static Intake intake;
     private static Kinematics kinematics;
     private static Shooter shooter;
@@ -33,7 +33,7 @@ public class DautoCloseSolo extends OpMode {
     private Follower follower;
     private Alliances alliance;
 
-    public DautoCloseSolo(Alliances alliance) {
+    public DautoClose(Alliances alliance) {
         this.alliance = alliance;
     }
 
@@ -50,11 +50,11 @@ public class DautoCloseSolo extends OpMode {
     private Pose pickup3Control = new Pose(64, 26);
     private Pose gateControl3 = new Pose(32.5, 53.5);
     private Pose gateIntake = new Pose(11, 56.5, Math.toRadians(135));
-    private Pose parkPose = new Pose(40, 75, Math.toRadians(180));
+    private static Pose parkPose = new Pose(40, 75, Math.toRadians(180));
 
 
     //private Path scorePreload;
-    private PathChain scorePreload, grabPickup1, openGate1, scorePickup1, grabPickup2, openGate2, scorePickup2, grabPickup3, openGate3, scorePickup3, openGate4, gateIntake1, scoreGate1, park;
+    private PathChain scorePreload, grabPickup1, openGate1, scorePickup1, grabPickup2, openGate2, scorePickup2, gateIntake1, scoreGate1, gateIntake2, scoreGate2, scoreGate3, gateIntake3, park;
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
@@ -97,25 +97,6 @@ public class DautoCloseSolo extends OpMode {
                 .setLinearHeadingInterpolation(gatePose.getHeading(), scorePose.getHeading())
                 .build();
 
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierCurve(scorePose, pickup3Control ,pickup3Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
-                .build();
-
-        openGate3 = follower.pathBuilder()
-                .addPath(new BezierCurve(pickup3Pose, gateControl3, gatePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), gatePose.getHeading())
-                .build();
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-                .build();
-
-        openGate4 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, gatePose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), gatePose.getHeading())
-                .build();
 
         gateIntake1 = follower.pathBuilder()
                 .addPath(new BezierLine(gatePose, gateIntake))
@@ -131,6 +112,18 @@ public class DautoCloseSolo extends OpMode {
                 .addPath(new BezierLine(scorePose, parkPose))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading())
                 .build();
+    }
+
+    public static Pose getParkPose(Alliances currentAlliance) {
+        if(currentAlliance == Alliances.BLUE) {
+            return parkPose;
+        }
+        if(currentAlliance == Alliances.RED) {
+            return parkPose.mirror();
+        }
+        else {
+            return parkPose;
+        }
     }
 
     private Pose goalPose() {
@@ -257,13 +250,6 @@ public class DautoCloseSolo extends OpMode {
                 follow(follower, scorePickup2, true),
                 shootAndWait(),
 
-                setIntakeMode(IntakeModes.INTAKE),
-                follow(follower, grabPickup3),
-                stopIntakingResidual(),
-                follow(follower, openGate3),
-                follow(follower, scorePickup3, true),
-                shootAndWait(),
-                //follow(follower, openGate4),
                 setIntakeMode(IntakeModes.INTAKE),
                 follow(follower, gateIntake1, true),
                 waitMs(300),
