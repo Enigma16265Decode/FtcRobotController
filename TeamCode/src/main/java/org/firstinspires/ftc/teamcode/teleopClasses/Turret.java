@@ -20,7 +20,7 @@ public class Turret {
     private double degrees = 180;
     private double turretOffset = 0, limelightOffset = 0;
     private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
-    private double turretZero = 0.495; //also 180
+    private double turretZero = 0.49; //also 180
     private double turretZeroOffset = ticks - turretZero;
     private boolean homeOverride = false;
     public Turret(HardwareMap hardwareMap, Kinematics kinematics, LimelightSS limelight, Alliances alliance) {
@@ -87,7 +87,7 @@ public class Turret {
     }
 
     public void offsetController(Gamepad gamepad2) {
-        final double toOffset = 0.0075;
+        final double toOffset = 0.02;
         if(gamepad2.leftBumperWasPressed()) {
             turretOffset += toOffset;
         }
@@ -119,7 +119,7 @@ public class Turret {
     }
 
     private void setTurretPosition(double position) {
-        final double offset = -0.03;
+        final double offset = -0.015;
         if(position > 1) {
             position = 1;
         }

@@ -12,18 +12,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.enums.IntakeModes;
+import org.firstinspires.ftc.teamcode.enums.ShootingRanges;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
-enum ShootingRanges {
-    CLOSE,
-    FAR
-}
 public class Shooter {
-    private final int farSpeed = 1540;
-    ShootingRanges shootingRange = ShootingRanges.CLOSE;
+    private final int farSpeed = 1500;
+    private ShootingRanges shootingRange = ShootingRanges.CLOSE;
     private final Gamepad gamepad1, gamepad2;
     private final HardwareMap hardwareMap;
     private Turret turret;
@@ -42,7 +39,7 @@ public class Shooter {
     private DcMotor secondaryShooter;
     private Servo hood;
     private Servo gate;
-    private final int[] closeShooterVelocities = {1080, 1080, 1120, 1160, 1240}; //y=3.16667x+928.33333
+    private final int[] closeShooterVelocities = {1080, 1080, 1120, 1180, 1250}; //y=3.16667x+928.33333
     private final double[] closeHoodPoses = {0.66, 0.8, 0.881, 0.882, 0.883}; //y=0.00675x+0.225
     private final double[] closeDistances = {52, 64, 76, 88};
     Map<Double, Double> distanceFromHoodPos = new HashMap<>();

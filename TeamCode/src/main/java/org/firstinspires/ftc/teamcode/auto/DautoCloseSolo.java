@@ -208,7 +208,7 @@ public class DautoCloseSolo extends OpMode {
 
     public static Command setHoodPosForClose() {
         return sequential(
-                setHoodPos(0.68)
+                setHoodPos(0.8)
         );
     }
 
