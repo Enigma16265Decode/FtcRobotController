@@ -23,9 +23,9 @@ public class ServoTunerBasic extends OpMode {
     }
 
     public void setTurretPos(double pos) {
-        //turretRight.setPosition(pos);
-        //turretLeft.setPosition(pos);
-        hood.setPosition(pos);
+        turretRight.setPosition(pos);
+        turretLeft.setPosition(pos);
+        //hood.setPosition(pos);
     }
 
     @Override
@@ -43,10 +43,10 @@ public class ServoTunerBasic extends OpMode {
             setTurretPos(1);
         }
         if(gamepad1.rightBumperWasPressed()) {
-            setTurretPos(turretLeft.getPosition() + 0.005);
+            setTurretPos(turretLeft.getPosition() + 0.01);
         }
         if(gamepad1.leftBumperWasPressed()) {
-            setTurretPos(turretLeft.getPosition() - 0.005);
+            setTurretPos(turretLeft.getPosition() - 0.01);
         }
         telemetry.addData("turretPos", turretRight.getPosition());
         telemetry.update();

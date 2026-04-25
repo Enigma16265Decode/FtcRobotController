@@ -66,6 +66,7 @@ public class Shooter {
         this.kinematics = kinematics;
 
         setHoodPos(0.76);
+        this.turret.setTurretOverride(0.5);
     }
 
     public int getTargetSpeed() {
@@ -185,9 +186,19 @@ public class Shooter {
         return closeHoodPoses[getDistanceIndex()];
     }
 
+    private void turretOverrideManager() {
+        if(gamepad2.backWasPressed()) {
+            turret.toggleTurretOverride();
+        }
+        if(gamepad2.yWasPressed()) {
+            turret.setTurretOverride(0.5);
+        }
+    }
+
 
     public void shooterController() {
         setShooterPosBasedOnMode();
+        turretOverrideManager();
         //setHoodPos(hoodPosBasedOnDistance());
 
 

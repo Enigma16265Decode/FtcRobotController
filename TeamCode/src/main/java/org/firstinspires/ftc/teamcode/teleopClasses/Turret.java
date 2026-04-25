@@ -20,9 +20,10 @@ public class Turret {
     private double degrees = 180;
     private double turretOffset = 0, limelightOffset = 0;
     private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
-    private double turretZero = 0.49; //also 180
-    private double turretZeroOffset = ticks - turretZero;
-    private boolean homeOverride = false;
+    private final double turretZero = 0.54; //also 180
+    private final double turretZeroOffset = ticks - turretZero;
+    private boolean turretOverride = false;
+    private double turretOverrideValue = 0;
     public Turret(HardwareMap hardwareMap, Kinematics kinematics, LimelightSS limelight, Alliances alliance) {
         turretLeft = hardwareMap.get(Servo.class, "turretLeft");
         turretRight = hardwareMap.get(Servo.class, "turretRight"); //0.782 0.222
@@ -35,7 +36,6 @@ public class Turret {
         this.kinematics = kinematics;
         this.limelight = limelight;
         this.alliance = alliance;
-        this.homeOverride = false;
     }
 
     /** Moves the turret according to PID and target pos**/
@@ -72,14 +72,36 @@ public class Turret {
 
         setTargetBasedOnHeadingToGoal();
 
-
-        if(homeOverride) {
-            targetPos = 0.5;
+        if(!turretOverride) {
+            double totalOffset = turretOffset + limelightOffset;
+            setTurretPosition(targetPos + totalOffset);
         }
+        else {
+            setTurretPosition(turretOverrideValue);
+        }
+    }
 
+    public void toggleTurretOverride() {
+        boolean prevState = turretOverride;
+        if(prevState) {
+            turretOverride = false;
+        }
+        else {
+            turretOverride = true;
+        }
+    }
 
-        double totalOffset = turretOffset + limelightOffset;
-        setTurretPosition(targetPos + totalOffset);
+    public void setTurretOverride(boolean toSet) {
+        turretOverride = toSet;
+    }
+
+    public void setTurretOverride(boolean toSet, double value) {
+        turretOverride = toSet;
+        turretOverrideValue = value;
+    }
+
+    public void setTurretOverride(double value) {
+        turretOverrideValue = value;
     }
 
     public double getLimelightOffset() {
@@ -93,9 +115,6 @@ public class Turret {
         }
         if(gamepad2.rightBumperWasPressed()) {
             turretOffset -= toOffset;
-        }
-        if(gamepad2.backWasPressed()) {
-            homeOverride = true;
         }
     }
 
@@ -119,7 +138,7 @@ public class Turret {
     }
 
     private void setTurretPosition(double position) {
-        final double offset = -0.015;
+        final double offset = -0.0;
         if(position > 1) {
             position = 1;
         }
@@ -146,7 +165,7 @@ public class Turret {
 
     /** Sets the turret's target based on robot position relative to goal **/
     public void setTargetBasedOnHeadingToGoal() {
-        if(!homeOverride) {
+        if(!turretOverride) {
             targetPos = (kinematics.getHeadingToGoal() * ticksInDegree) - turretZeroOffset;
         }
     }
