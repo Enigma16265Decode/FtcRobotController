@@ -17,11 +17,6 @@ public class ServoTunerBasic extends OpMode {
         hood = hardwareMap.get(Servo.class, "hood");
     }
 
-    @Override
-    public void start() {
-
-    }
-
     public void setTurretPos(double pos) {
         turretRight.setPosition(pos);
         turretLeft.setPosition(pos);

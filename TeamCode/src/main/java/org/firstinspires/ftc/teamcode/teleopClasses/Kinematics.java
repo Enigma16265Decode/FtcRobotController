@@ -78,7 +78,6 @@ public class Kinematics { //this does a lot of the calculations/logic
         double x2 = goalPose.getX();
         double y2 = goalPose.getY();
 
-        double distance = Math.hypot(x1-x2, y1-y2);
-        return distance;
+        return Math.hypot(x1-x2, y1-y2); //distance
     }
 }
