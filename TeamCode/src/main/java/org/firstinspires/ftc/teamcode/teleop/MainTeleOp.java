@@ -33,7 +33,7 @@ public class MainTeleOp extends OpMode {
 
     private Follower follower;
     private Alliances alliance;
-    private static final Pose startingPose = new Pose(105,72, Math.toRadians(0));
+    private Pose startingPose = new Pose(105,72, Math.toRadians(0));
     //private static Pose startingPose = DautoClose.getParkPose() //todo just add this to constructor
     private Supplier<PathChain> pathChain;
     static TelemetryManager telemetryM;
@@ -46,8 +46,9 @@ public class MainTeleOp extends OpMode {
         }
     }
 
-    public MainTeleOp(Alliances alliance) {
+    public MainTeleOp(Alliances alliance, Pose startingPose) {
         this.alliance = alliance;
+        this.startingPose = startingPose;
     }
 
 

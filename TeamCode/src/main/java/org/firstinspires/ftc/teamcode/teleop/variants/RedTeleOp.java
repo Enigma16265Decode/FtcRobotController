@@ -7,9 +7,9 @@ import org.firstinspires.ftc.teamcode.auto.DautoCloseSolo;
 import org.firstinspires.ftc.teamcode.enums.Alliances;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleOp;
 
-@TeleOp(name = "! BlueTeleOp")
-public class BlueTeleOp extends MainTeleOp {
-    public BlueTeleOp() {
-        super(Alliances.BLUE, DautoCloseSolo.parkPose.mirror(144));
+@TeleOp(name = "! RedTeleOp")
+public class RedTeleOp extends MainTeleOp {
+    public RedTeleOp() {
+        super(Alliances.RED, DautoCloseSolo.parkPose);
     }
 }

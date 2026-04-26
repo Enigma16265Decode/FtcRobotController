@@ -16,11 +16,11 @@ public class Turret {
     private Servo turretLeft, turretRight;
     private Timer limelightTimer;
     private double targetPos = 0.0; //0.59/180
-    private final double ticks = 0.56;
+    private final double ticks = 0.5886; //0.56;
     private final double degrees = 180;
     private double turretOffset = 0, limelightOffset = 0;
     private final double ticksInDegree = (double) ticks / degrees; //private final double ticksInDegree = (double) 1 / 330; 0.574 / 180
-    private final double turretZero = 0.54; //also 180
+    private final double turretZero = 0.4968; //also 180
     private final double turretZeroOffset = ticks - turretZero;
     private boolean turretOverride = false;
     private double turretOverrideValue = 0;
@@ -42,16 +42,18 @@ public class Turret {
     public void moveTurret() {
         limelight.limelightController();
 
-        final double turretSpeed = limelight.getTx() * ticksInDegree;
+        /*
 
+        final double turretSpeed = limelight.getTx() * ticksInDegree;
+        double suggestedOffset = 0;
 
         if(getLimelightState() != LimelightStates.LOST && getLimelightState() != LimelightStates.NON_VALID_TARGET) {
             if(limelightTimer.getElapsedTime() > 1000) {
                 if(limelight.getLimelightState() == LimelightStates.OFF_RIGHT) {
-                    limelightOffset += turretSpeed;
+                    suggestedOffset += turretSpeed;
                 }
                 if(limelight.getLimelightState() == LimelightStates.OFF_LEFT) {
-                    limelightOffset -= turretSpeed;
+                    suggestedOffset -= turretSpeed;
                 }
                 limelightTimer.resetTimer();
             }
@@ -63,9 +65,10 @@ public class Turret {
 
 
         if(limelight.getTx() > -4 && limelight.getTx() < 4) {
-            limelightOffset = limelight.getTx() * ticksInDegree * -1;
+            limelightOffset = suggestedOffset;
         }
 
+        */
 
 
         setTargetBasedOnHeadingToGoal();

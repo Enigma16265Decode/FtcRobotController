@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name = "! servo tuner basic")
 public class ServoTunerBasic extends OpMode {
     private Servo turretRight, turretLeft, hood;
+    boolean turretOn = false;
 
     @Override
     public void init() {
@@ -18,13 +19,20 @@ public class ServoTunerBasic extends OpMode {
     }
 
     public void setTurretPos(double pos) {
-        turretRight.setPosition(pos);
-        turretLeft.setPosition(pos);
-        //hood.setPosition(pos);
+        if(turretOn) {
+            turretRight.setPosition(pos);
+            turretLeft.setPosition(pos);
+        }
+        else {
+            hood.setPosition(pos);
+        }
     }
 
     @Override
     public void loop() {
+        if(gamepad1.startWasPressed()) {
+            turretOn = !turretOn;
+        }
         if(gamepad1.aWasPressed()) {
             setTurretPos(0);
         }
@@ -43,7 +51,10 @@ public class ServoTunerBasic extends OpMode {
         if(gamepad1.leftBumperWasPressed()) {
             setTurretPos(turretLeft.getPosition() - 0.01);
         }
+        telemetry.addData("PRESS START TO TOGGLE BETWEEN TURRET AND HOOD", "");
+        telemetry.addData("===========================================","");
         telemetry.addData("turretPos", turretRight.getPosition());
+        telemetry.addData("hoodPos", hood.getPosition());
         telemetry.update();
     }
 }

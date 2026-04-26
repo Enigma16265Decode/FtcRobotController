@@ -32,6 +32,7 @@ public class DautoCloseSolo extends OpMode {
     private static LimelightSS limelight;
     private Follower follower;
     private Alliances alliance;
+    public double mirrorValue = 144;
 
     public DautoCloseSolo(Alliances alliance) {
         this.alliance = alliance;
@@ -50,7 +51,7 @@ public class DautoCloseSolo extends OpMode {
     private Pose pickup3Control = new Pose(64, 26);
     private Pose gateControl3 = new Pose(32.5, 53.5);
     private Pose gateIntake = new Pose(11, 56.5, Math.toRadians(135));
-    private Pose parkPose = new Pose(40, 75, Math.toRadians(180));
+    public static Pose parkPose = new Pose(40, 75, Math.toRadians(180));
 
 
     //private Path scorePreload;
@@ -208,18 +209,19 @@ public class DautoCloseSolo extends OpMode {
 
     public static Command setHoodPosForClose() {
         return sequential(
-                setHoodPos(0.8)
+                setHoodPos(0.84)
         );
     }
 
     public static Command shootAndWait() {
         return sequential(
                 openGate(),
-                waitMs(700),
+                waitMs(350),
                 setIntakeMode(IntakeModes.SHOOT_CLOSE),
-                waitMs(600),
-                setIntakeMode(IntakeModes.IDLE),
-                closeGate()
+                waitMs(550),
+                closeGate(),
+                waitMs(50),
+                setIntakeMode(IntakeModes.IDLE)
         );
     }
 
@@ -244,7 +246,9 @@ public class DautoCloseSolo extends OpMode {
                 shootAndWait(),
 
                 setIntakeMode(IntakeModes.INTAKE),
-                follow(follower, grabPickup1),
+                follow(follower
+
+                        , grabPickup1),
                 stopIntakingResidual(),
                 follow(follower, openGate1),
                 follow(follower, scorePickup1, true),
@@ -269,8 +273,8 @@ public class DautoCloseSolo extends OpMode {
                 waitMs(300),
                 stopIntakingResidual(),
                 follow(follower, scoreGate1),
-                shootAndWait()
-                //follow(follower, park)
+                shootAndWait(),
+                follow(follower, park)
         );
     }
 
@@ -285,19 +289,19 @@ public class DautoCloseSolo extends OpMode {
     //todo make sure is updated :thumbsup:
     private void doMirroring() {
         if(alliance == Alliances.RED) {
-            startPose = startPose.mirror();
-            scorePose = scorePose.mirror();
-            gatePose = gatePose.mirror();
-            pickup1Pose = pickup1Pose.mirror();
-            pickup1Control = pickup1Control.mirror();
-            gateControl1 = gateControl1.mirror();
-            pickup2Pose = pickup2Pose.mirror();
-            pickup2Control = pickup2Control.mirror();
-            gateControl2 = gateControl2.mirror();
-            pickup3Pose = pickup3Pose.mirror();
-            pickup3Control = pickup3Control.mirror();
-            gateControl3 = gateControl3.mirror();
-            parkPose = parkPose.mirror();
+            startPose = startPose.mirror(mirrorValue);
+            scorePose = scorePose.mirror(mirrorValue);
+            gatePose = gatePose.mirror(mirrorValue);
+            pickup1Pose = pickup1Pose.mirror(mirrorValue);
+            pickup1Control = pickup1Control.mirror(mirrorValue);
+            gateControl1 = gateControl1.mirror(mirrorValue);
+            pickup2Pose = pickup2Pose.mirror(mirrorValue);
+            pickup2Control = pickup2Control.mirror(mirrorValue);
+            gateControl2 = gateControl2.mirror(mirrorValue);
+            pickup3Pose = pickup3Pose.mirror(mirrorValue);
+            pickup3Control = pickup3Control.mirror(mirrorValue);
+            gateControl3 = gateControl3.mirror(mirrorValue);
+            parkPose = parkPose.mirror(mirrorValue);
         }
     }
 
@@ -336,6 +340,9 @@ public class DautoCloseSolo extends OpMode {
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
+        telemetry.addLine();
+        telemetry.addData("target speed", shooter.getTargetSpeed());
+        telemetry.addData("current speed", shooter.getShooterVelocity());
         telemetry.update();
     }
 
